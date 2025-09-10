@@ -84,7 +84,6 @@ export const AIProvider = ({ children, userId }) => {
   const { currentUser } = useAuth();
   const userData = useUserStore(state => state.userData);
   
-
   const [userContext, setUserContext] = useState({
     userId: userId || '',
     donationHistory: [],
@@ -97,7 +96,6 @@ export const AIProvider = ({ children, userId }) => {
 
   const { getItem, setItem, getAllItems, removeItem, isInitialized } = useIndexedDB('chatConversations');
 
-  // Load conversations from IndexedDB on component mount or when database is initialized
   useEffect(() => {
     const loadConversations = async () => {
       try {

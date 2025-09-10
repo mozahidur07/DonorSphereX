@@ -116,7 +116,7 @@ router.post('/', authenticateUser, async (req, res) => {
   try {
     console.log('Request body received:', req.body);
      
-    const userIdentifier = req.user.userId || req.user.id;
+    const userIdentifier = req.user.id; b
     console.log('User identifier from token:', userIdentifier);
     
     if (!userIdentifier) {
