@@ -1,16 +1,10 @@
 {
   "version": 2,
-  "name": "donorsphereX-api",
+  "name": "donorspherex-api",
   "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
+    { "src": "server.js", "use": "@vercel/node" }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/server.js"
-    }
+    { "src": "/(.*)", "dest": "/server.js" }
   ]
 }
