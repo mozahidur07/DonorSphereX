@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import api from './api';
 
-/**
- * A debug component to monitor API calls and display them in the console
- */
+ 
 const ApiDebugger = () => {
   const [isActive, setIsActive] = useState(false);
   const [logs, setLogs] = useState([]);
 
-  useEffect(() => {
-    // Set up API request interceptor
+  useEffect(() => { 
     const requestInterceptor = api.interceptors.request.use((config) => {
       const requestData = {
         method: config.method?.toUpperCase(),
@@ -19,8 +16,7 @@ const ApiDebugger = () => {
         data: config.data,
         timestamp: new Date().toISOString()
       };
-
-      console.log('%c API Request ', 'background: #2196F3; color: #fff', requestData);
+ 
       
       setLogs(prevLogs => [...prevLogs, { type: 'request', ...requestData }]);
       return config;
@@ -36,9 +32,7 @@ const ApiDebugger = () => {
           method: response.config.method?.toUpperCase(),
           data: response.data,
           timestamp: new Date().toISOString()
-        };
-
-        console.log('%c API Response ', 'background: #4CAF50; color: #fff', responseData);
+        }; 
         
         setLogs(prevLogs => [...prevLogs, { type: 'response', ...responseData }]);
         return response;
@@ -53,8 +47,7 @@ const ApiDebugger = () => {
           message: error.message,
           timestamp: new Date().toISOString()
         };
-
-        console.log('%c API Error ', 'background: #F44336; color: #fff', errorData);
+ 
         
         setLogs(prevLogs => [...prevLogs, { type: 'error', ...errorData }]);
         return Promise.reject(error);

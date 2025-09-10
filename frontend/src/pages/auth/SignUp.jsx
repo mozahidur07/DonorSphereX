@@ -6,7 +6,7 @@ const SignUp = () => {
   const navigate = useNavigate();
   const { register, error: authError, setError: setAuthError, currentUser } = useAuth();
   
-  // Redirect to profile if user is already logged in
+ 
   useEffect(() => {
     if (currentUser) {
       navigate('/profile');
@@ -26,28 +26,24 @@ const SignUp = () => {
     showConfirmPassword: false,
     agreeToTerms: false
   });
-  
-  // Password strength validation
+   
   const getPasswordStrength = () => {
     const { password } = formData;
     if (!password) return '';
-    
-    // Check for requirements
+     
     const hasMinLength = password.length >= 8;
     const hasNumber = /[0-9]/.test(password);
     const hasSpecialChar = /[!@#$%^&*]/.test(password);
     const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
-    
-    // Calculate score
+     
     let score = 0;
     if (hasMinLength) score += 1;
     if (hasNumber) score += 1;
     if (hasSpecialChar) score += 1;
     if (hasUpperCase) score += 1;
     if (hasLowerCase) score += 1;
-    
-    // Determine strength based on score
+     
     if (score <= 2) return 'weak';
     if (score <= 4) return 'medium';
     return 'strong';
@@ -76,7 +72,7 @@ const SignUp = () => {
     e.preventDefault();
     setAuthError(null);
     
-    // Validate form
+     
     if (formData.password !== formData.confirmPassword) {
       setAuthError("Passwords don't match!");
       return;
@@ -99,32 +95,25 @@ const SignUp = () => {
     
     try {
       setLoading(true);
-      
-      // Keep roles as an object with boolean values (matches backend schema)
+       
       const roleObject = {
         donor: formData.roles.donor,
         staff: formData.roles.staff
       };
-      
-      // Prepare data for submission
+       
       const userData = {
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,
-        role: roleObject  // Changed from "roles" to "role" to match backend field name
+        role: roleObject  
       };
-      
-      // Call register function from auth context
-      // This will register AND log in the user in a single step
-      console.log('About to register with data:', userData);
+       
       const result = await register(userData);
-      console.log('Registration result:', result);
+      // console.log('Registration result:', result);
       
       if (result.success) {
-        // Show success message
-        alert('Registration successful! Welcome to Life Donor. You are now logged in.');
+        alert('Registration successful! Welcome to DonorSphereX. You are now logged in.');
 
-        // Redirect to profile immediately (user is automatically logged in by the register function)
         navigate('/profile');
       }
     } catch (error) {
@@ -136,20 +125,20 @@ const SignUp = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FEE8E8] py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-lg w-full space-y-8 bg-white rounded-2xl shadow-xl p-8 border border-red-100 relative overflow-hidden">
-        {/* Background decorative elements */}
+      <div className="max-w-lg w-full space-y-8 bg-white rounded-2xl shadow-xl p-4 md:p-8 border border-red-100 relative overflow-hidden">
+         
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-red-100 rounded-full opacity-50"></div>
         <div className="absolute top-40 -left-10 w-24 h-24 bg-red-100 rounded-full opacity-50"></div>
         <div className="absolute bottom-10 right-10 w-32 h-32 bg-red-100 rounded-full opacity-40"></div>
         
-        {/* Blood drop icon decoration - top left */}
+         
         <div className="absolute top-0 left-0 text-red-200 opacity-30 transform -translate-x-1/2 -translate-y-1/2">
           <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
           </svg>
         </div>
         
-        {/* Heart icon decoration - bottom right */}
+ 
         <div className="absolute bottom-0 right-0 text-red-200 opacity-30 transform translate-x-1/4 translate-y-1/4">
           <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -164,7 +153,7 @@ const SignUp = () => {
               </svg>
             </div>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Join Life Donor</h2>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Join DonorSphereX</h2>
           <div className="mt-2 text-center text-sm text-gray-600 flex justify-center items-center space-x-1">
             <span>Or</span>
             <Link to="/signin" className="font-medium text-red-600 hover:text-red-800 transition-colors duration-300 flex items-center">
@@ -185,7 +174,7 @@ const SignUp = () => {
                 Full Name
               </label>
               <div className="relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 hidden md:flex items-center pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                   </svg>
@@ -195,7 +184,7 @@ const SignUp = () => {
                   name="fullName"
                   type="text"
                   required
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
+                  className="appearance-none block w-full pl-2 md:pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
                   placeholder="Enter your full name"
                   value={formData.fullName}
                   onChange={handleChange}
@@ -212,7 +201,7 @@ const SignUp = () => {
                 Email address
               </label>
               <div className="relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 hidden md:flex items-center pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
@@ -224,7 +213,7 @@ const SignUp = () => {
                   type="email"
                   autoComplete="email"
                   required
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
+                  className="appearance-none block w-full pl-2 md:pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
                   placeholder="Enter your email address"
                   value={formData.email}
                   onChange={handleChange}
@@ -233,7 +222,7 @@ const SignUp = () => {
             </div>
             
             <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-3 border border-red-200 shadow-inner relative overflow-hidden">
-              {/* Background decorative blood cell */}
+              
               <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-red-200 opacity-30"></div>
               <div className="absolute -left-4 -top-4 w-16 h-16 rounded-full bg-red-200 opacity-20"></div>
               
@@ -312,7 +301,7 @@ const SignUp = () => {
                 Password
               </label>
               <div className="relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 hidden md:flex items-center pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                   </svg>
@@ -322,7 +311,7 @@ const SignUp = () => {
                   name="password"
                   type={formData.showPassword ? "text" : "password"}
                   required
-                  className="appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
+                  className="appearance-none block w-full pl-2 md:pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
                   placeholder="Create a strong password"
                   value={formData.password}
                   onChange={handleChange}
@@ -411,7 +400,7 @@ const SignUp = () => {
                 Confirm Password
               </label>
               <div className="relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 hidden md:flex items-center pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                   </svg>
@@ -421,7 +410,7 @@ const SignUp = () => {
                   name="confirmPassword"
                   type={formData.showConfirmPassword ? "text" : "password"}
                   required
-                  className="appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
+                  className="appearance-none block w-full pl-2 md:pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -547,7 +536,7 @@ const SignUp = () => {
                 <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
               </svg>
             </div>
-            <p className="text-xs text-gray-500">Life Donor © {new Date().getFullYear()} All rights reserved.</p>
+            <p className="text-xs text-gray-500">DonorSphereX © {new Date().getFullYear()} All rights reserved.</p>
           </div>
         </form>
       </div>

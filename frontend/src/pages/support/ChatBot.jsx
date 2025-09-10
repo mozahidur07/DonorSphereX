@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAI } from './AIProvider';
-import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import './ChatBot.css';
 import { useLocation } from "react-router-dom";
@@ -20,8 +19,7 @@ const ChatBot = () => {
     deleteConversation,
     useOpenRouter
   } = useAI();
-  
-  // When component mounts, switch to the chat menu if we have a currentConversationId
+   
   useEffect(() => {
     if (currentConversationId && conversations.some(c => c.id === currentConversationId)) {
       setChatMenu('chat');
@@ -30,61 +28,47 @@ const ChatBot = () => {
 
   const location = useLocation();
   const [subPath, setSubPath] = useState("");
-   useEffect(() => {
-    // location.pathname = "/user/123/profile"
-    // split করে userid এর পরের অংশ বের করছি
-    const parts = location.pathname.split("/");
-    // parts = ["", "user", "123", "profile"]
+   useEffect(() => { 
+    const parts = location.pathname.split("/"); 
     if (parts.length > 3) {
-      setSubPath(parts[3]); // এখানে subpath = "profile"
-    }
-    console.log("Subpath:", subPath);
+      setSubPath(parts[3]); 
+      } 
     
   }, [location]);
-
-
 
   const [inputMessage, setInputMessage] = useState('');
   const messagesEndRef = useRef(null);
   const currentConversation = conversations.find(c => c.id === currentConversationId);
-  
-  // Log when the current conversation changes for debugging
-  useEffect(() => {
-    console.log('Current conversation changed to:', currentConversationId);
+   
+  useEffect(() => { 
   }, [currentConversationId]);
   
-  // Initialize conversation handling
+ 
   useEffect(() => {
     const initConversation = async () => {
       const lastActiveConversationId = localStorage.getItem('lastActiveConversationId');
       
-      // Check if there's a saved conversation that we need to load
+ 
       if (lastActiveConversationId && conversations.length > 0) {
-        // Check if the last active conversation still exists
+ 
         const conversationExists = conversations.some(conv => conv.id === lastActiveConversationId);
         
         if (conversationExists) {
           setCurrentConversationId(lastActiveConversationId);
-          setChatMenu('chat'); // Make sure we switch to chat view
+          setChatMenu('chat'); 
         } else if (conversations.length > 0) {
-          // If the saved conversation doesn't exist, use the most recent one
           setCurrentConversationId(conversations[0].id);
         } else {
-          // Create a new conversation if we don't have any
           await startNewConversation();
         }
       } else if (conversations.length === 0) {
-        // If we don't have any conversations, create a new one
         await startNewConversation();
       } else if (!currentConversationId && conversations.length > 0) {
-        // Use the most recent conversation if we don't have a current one
         setCurrentConversationId(conversations[0].id);
       }
     };
     
-    // Only run this if we don't have a current conversation ID or we have a lastActiveConversationId
     if (!currentConversationId || localStorage.getItem('lastActiveConversationId')) {
-      // Add a small delay to ensure database connection is ready
       const timeoutId = setTimeout(() => {
         initConversation();
       }, 500);
@@ -93,9 +77,7 @@ const ChatBot = () => {
     }
   }, [currentConversationId, conversations, startNewConversation, setCurrentConversationId, setChatMenu]);
 
-  // Scroll to bottom of messages whenever messages change or when loading completes
   useEffect(() => {
-    // Use a small timeout to ensure DOM has updated
     const scrollTimer = setTimeout(() => {
       if (messagesEndRef.current) {
         messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -105,7 +87,6 @@ const ChatBot = () => {
     return () => clearTimeout(scrollTimer);
   }, [currentConversation, isLoading]);
   
-  // Also scroll down when user clicks a suggested question or menu changes to chat
   useEffect(() => {
     if (chatMenu === 'chat') {
       const scrollTimer = setTimeout(() => {
@@ -119,33 +100,24 @@ const ChatBot = () => {
 
   const [sendButtonAnimation, setSendButtonAnimation] = useState(false);
 
-  const animateIcon = (iconId) => {
-    // Get the icon element
+  const animateIcon = (iconId) => { 
     const iconElement = document.getElementById(iconId);
     if (!iconElement) return;
-    
-    // Prevent multiple animations from running simultaneously
+     
     if (iconElement.classList.contains('animation-send') || 
         iconElement.classList.contains('animation-return')) {
       return;
     }
-    
-    // Add animation class to start the animation
+     
     iconElement.classList.add('animation-send');
-    
-    // Use requestAnimationFrame for smoother animation timing
-    requestAnimationFrame(() => {
-      // After the animation completes
-      setTimeout(() => {
-        // Remove the send animation
+     
+    requestAnimationFrame(() => { 
+      setTimeout(() => { 
         iconElement.classList.remove('animation-send');
-        
-        // Use requestAnimationFrame for smoother transition
-        requestAnimationFrame(() => {
-          // Add the return animation
+         
+        requestAnimationFrame(() => { 
           iconElement.classList.add('animation-return');
-          
-          // Remove return animation after it completes
+           
           setTimeout(() => {
             iconElement.classList.remove('animation-return');
           }, 500);
@@ -157,19 +129,16 @@ const ChatBot = () => {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
-    
-    // Trigger the animation for send icon
+     
     animateIcon('send-icon');
     
     sendMessage(inputMessage, currentConversationId);
     setInputMessage('');
   };
 
-  const handleSuggestedQuestion = (question) => {
-    // Simply send the message - we've fixed the order issue in sendMessage function
+  const handleSuggestedQuestion = (question) => { 
     sendMessage(question, currentConversationId);
-    
-    // Scroll to bottom after clicking a suggested question
+     
     setTimeout(() => {
       if (messagesEndRef.current) {
         messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -188,15 +157,13 @@ const ChatBot = () => {
   };
 
   const parseAIResponse = (content) => {
-    try {
-      // Try simple parsing first
+    try { 
       return JSON.parse(content);
     } catch (error) {
       console.error("Failed to parse AI response:", error);
-      
-      // If parsing fails, return a fallback object
+       
       return {
-        answer: content.substring(0, 1500), // Limit to reasonable size
+        answer: content.substring(0, 1500), 
         suggestedQuestions: [
           "How can I donate blood?", 
           "What are the eligibility requirements?",
@@ -374,17 +341,13 @@ const ChatBot = () => {
       </div>
     );
   };
-
-  // Generate a meaningful title from conversation content
-  const generateConversationTitle = (conversation) => {
-    // First try to find first user message
+ 
+  const generateConversationTitle = (conversation) => { 
     const firstUserMsg = conversation.messages.find(m => m.role === 'user');
     
-    if (firstUserMsg) {
-      // Try to extract key topic from the message
+    if (firstUserMsg) { 
       const content = firstUserMsg.content.toLowerCase();
-      
-      // Check for common topics
+       
       if (content.includes('donate blood') || content.includes('blood donation')) {
         return "Blood Donation Discussion";
       } else if (content.includes('organ') || content.includes('transplant')) {
@@ -400,12 +363,10 @@ const ChatBot = () => {
       } else if (content.includes('profile') || content.includes('account')) {
         return "Account Management";
       }
-      
-      // If no topic detected, use truncated message
+       
       return content.length > 25 ? content.substring(0, 25) + '...' : content;
     }
-    
-    // Fallback to date-based title
+     
     const date = new Date(conversation.createdAt);
     return `Conversation on ${date.toLocaleDateString()}`;
   };
@@ -451,7 +412,6 @@ const ChatBot = () => {
                   className="flex justify-between items-center p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
                   onClick={(e) => {
                     e.preventDefault();
-                    console.log("Switching to conversation:", conversation.id);
                     setCurrentConversationId(conversation.id);
                     setTimeout(() => {
                       setChatMenu('chat');
@@ -555,8 +515,7 @@ const ChatBot = () => {
                 <span>New Chat</span>
               </button>
             )}
-          </div>
-          {/* Only show the close button in the Support page */}
+          </div> 
           {location.pathname === '/support' && (
             <button 
               onClick={() => window.closeChatbot && window.closeChatbot()}
@@ -570,10 +529,8 @@ const ChatBot = () => {
           )}
         </div>
       </div>
-      
-      {/* No settings modal anymore */}
-      
-      {/* Chat Content */}
+       
+       
       <div className="flex-1 overflow-y-auto p-4 bg-[#e8e8e8b3] messages-container">
         {chatMenu === 'home' && renderChatHome()}
         {chatMenu === 'chat' && (
@@ -603,8 +560,7 @@ const ChatBot = () => {
         )}
         {chatMenu === 'history' && renderChatHistory()}
       </div>
-      
-      {/* Input Area - Only show in chat mode */}
+       
       {chatMenu === 'chat' && (
         <form onSubmit={handleSendMessage} className="p-3 bg-white border-t">
           <div className="flex space-x-2">

@@ -1,5 +1,7 @@
 import React from 'react';
 
+// for showcasing blood type compatibility on admin dashboard
+
 const bloodTypeData = [
   {
     type: 'A+',

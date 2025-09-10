@@ -75,13 +75,10 @@ export const AuthProvider = ({ children }) => {
   // Login function
   const login = async (email, password, selectedRole = 'donor') => {
     setError(null);
-    try {
-      // Use our centralized API client instead of axios directly
+    try { 
       const response = await apiPost('auth/login', { email, password });
-      
-      console.log('Login response:', response.data);
-      
-      // Get token and user data from the response structure
+       
+       
       const token = response.data.data.token;
       const userData = {
         userId: response.data.data.userId,
@@ -90,29 +87,25 @@ export const AuthProvider = ({ children }) => {
         email: response.data.data.email,
         role: response.data.data.role
       };
-      
-      // Check if the selected role matches the user's actual role
+       
       let roleMatched = true;
       let userRole = 'donor';
-      
-      // Determine the user's primary role
+       
       if (userData.role) {
-        if (typeof userData.role === 'object') {
-          // If role is an object with boolean values (e.g. { donor: true, staff: false })
+        if (typeof userData.role === 'object') { 
           const userRoles = Object.entries(userData.role)
             .filter(([_, hasRole]) => hasRole)
             .map(([roleName]) => roleName);
           
           userRole = userRoles.length > 0 ? userRoles[0] : 'donor';
           roleMatched = userData.role[selectedRole] === true;
-        } else if (Array.isArray(userData.role)) {
-          // If role is an array of strings
+        } else if (Array.isArray(userData.role)) { 
           userRole = userData.role.length > 0 ? userData.role[0] : 'donor';
           roleMatched = userData.role.includes(selectedRole);
         }
       }
       
-      console.log(`Role check: selected=${selectedRole}, actual=${userRole}, matched=${roleMatched}`);
+      
       
       if (!roleMatched) {
         return { 
@@ -177,12 +170,10 @@ export const AuthProvider = ({ children }) => {
   // Register function
   const register = async (userData) => {
     setError(null);
-    try {
-      console.log('Sending registration data:', userData);
+    try { 
       
       const response = await apiPost('auth/register', userData);
-      
-      console.log('Register response:', response.data);
+       
       
       // Get token and user data from the response structure
       const token = response.data.data.token;
@@ -193,9 +184,7 @@ export const AuthProvider = ({ children }) => {
         email: response.data.data.email,
         role: response.data.data.role
       };
-      
-      console.log('Extracted user data:', registeredUser);
-      console.log('Token:', token);
+       
       
       // Store token and set axios default header
       localStorage.setItem('authToken', token);

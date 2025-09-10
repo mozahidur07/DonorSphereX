@@ -62,7 +62,7 @@ const AppContent = () => {
   
   
   // Determine whether to show chat interface
-  const showChatInterface = !location.pathname.includes('/support');
+  const showChatInterface = !location.pathname.includes('/support') && !location.pathname.includes('/signin') && !location.pathname.includes('/signup');
 
   return (
     <div className="flex min-h-screen">

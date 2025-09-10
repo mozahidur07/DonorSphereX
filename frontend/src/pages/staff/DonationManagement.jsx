@@ -46,7 +46,6 @@ const DonationManagement = () => {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
       const token = localStorage.getItem('authToken');
       
-      // Build query parameters
       const queryParams = new URLSearchParams({
         page,
         limit
@@ -57,7 +56,6 @@ const DonationManagement = () => {
       if (filters.startDate) queryParams.append('startDate', filters.startDate);
       if (filters.endDate) queryParams.append('endDate', filters.endDate);
       
-      // Add search by ID or email functionality
       if (filters.searchQuery && filters.searchField) {
         queryParams.append(filters.searchField, filters.searchQuery);
       }
@@ -100,9 +98,6 @@ const DonationManagement = () => {
         payload.statusNotes = updateReason;
       }
       
-      console.log(`Updating donation status for ID: ${selectedDonation.donationId}`);
-      console.log('Payload:', payload);
-      console.log('Using PUT method to endpoint:', `${API_URL}/donations/${selectedDonation.donationId}/status`);
       
       const response = await axios.put(`${API_URL}/donations/${selectedDonation.donationId}/status`, payload, {
         headers: {
@@ -110,7 +105,6 @@ const DonationManagement = () => {
         }
       });
       
-      console.log('Status update response:', response.data);
       
       if (response.data.status === 'success') {
         // Refresh data

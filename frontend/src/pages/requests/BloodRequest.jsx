@@ -93,8 +93,7 @@ const BloodRequest = () => {
         // Ensure quantity is a number
         quantity: parseInt(formData.quantity, 10)
       };
-      
-      console.log('Submitting request data:', requestData);
+       
       
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
       const response = await axios.post(`${API_URL}/requests`, requestData, {

@@ -1,16 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import useCountAnimation from '../js/useCountAnimation';
-
-/**
- * A component that displays an animated number counting up to a target value
- * 
- * @param {Object} props
- * @param {string|number} props.value - The target value to count up to (can include formatting like '10,000+')
- * @param {number} props.duration - Duration of the animation in milliseconds
- * @param {string} props.className - Additional CSS classes
- * @param {string} props.storageKey - Unique key for sessionStorage to track if animation has been shown
- * @returns {React.ReactElement} The animated number component
- */
+ 
 const AnimatedNumber = ({ 
   value, 
   duration = 2000, 

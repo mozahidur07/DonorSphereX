@@ -222,8 +222,7 @@ const Profile = () => {
         }
       });
       
-      if (response.data.status === 'success') {
-        console.log('Fetched user donations:', response.data.data);
+      if (response.data.status === 'success') { 
         setUserDonations(response.data.data);
       } else {
         throw new Error(response.data.message || 'Failed to fetch donation data');
@@ -403,12 +402,10 @@ const Profile = () => {
         `${Date.now()}-${file.name}`, 
         { type: file.type, lastModified: Date.now() }
       );
-      
-      console.log("Selected new file:", uniqueFile.name, "Size:", uniqueFile.size, "Type:", uniqueFile.type, "Last Modified:", new Date(uniqueFile.lastModified).toISOString());
+       
       
       // Create a temporary preview URL
-      const previewUrl = URL.createObjectURL(uniqueFile);
-      console.log("Created preview URL:", previewUrl);
+      const previewUrl = URL.createObjectURL(uniqueFile); 
       
       // Save the preview URL with the file object for later cleanup
       uniqueFile._previewUrl = previewUrl;
@@ -431,8 +428,7 @@ const Profile = () => {
           aadharCard: { url: previewUrl }
         }
       }));
-      
-      console.log("Updated form state with preview URL");
+       
     }
   };
   
@@ -492,8 +488,7 @@ const Profile = () => {
         setIsSubmitting(false);
         return;
       }
-      
-      console.log("Starting KYC document upload with file:", kycFile.name, "modified:", new Date(kycFile.lastModified).toISOString());
+       
       
       // Reset any cached file URLs to prevent caching issues
       if (kycFile._url) {
@@ -504,34 +499,23 @@ const Profile = () => {
       // Use the uploadKycDocument function from the store
       const result = await uploadKycDocument(kycFile);
       
-      if (result.success) {
-        console.log("KYC upload successful:", JSON.stringify(result, null, 2));
-        
-        // Get the document URL from the result
+      if (result.success) { 
+         
         const documentUrl = result.data?.kycDocument?.url || 
                            result.data?.publicUrl || 
                            (result.data && result.data.publicUrl);
-                           
-        console.log("Setting document URL:", documentUrl);
-        
-        // Give backend a moment to process the update
+                             
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Reset KYC file state
+         
         setKycFile(null);
-        
-        // Clear any file inputs by resetting their value
+         
         const fileInputs = document.querySelectorAll('input[type="file"]');
         fileInputs.forEach(input => {
           input.value = '';
         });
-        
-        // Fetch fresh user data to ensure we have latest state
-        console.log("Fetching fresh user data after KYC upload");
-        const freshUserData = await fetchUserData();
-        console.log("Fresh user data:", JSON.stringify(freshUserData, null, 2));
-        
-        // Force a complete state refresh from the updated userData
+         
+        const freshUserData = await fetchUserData(); 
+         
         if (freshUserData) {
           setFormState({
             ...freshUserData,
@@ -558,10 +542,7 @@ const Profile = () => {
             }
           });
         }
-        
-        console.log("Form state completely refreshed with KYC document");
-        
-        // Show confirmation alert with refresh option
+          
         if (window.confirm('KYC document uploaded successfully and is pending verification. Do you want to refresh the page to see the changes?')) {
           window.location.reload();
         }
@@ -580,8 +561,7 @@ const Profile = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    try {
-      // Extract only the basic info fields - ensure we're not sending any profileCompletionDetails
+    try { 
       const basicInfoData = {
         name: formState.name || '',
         fullName: formState.name || '',
@@ -589,22 +569,17 @@ const Profile = () => {
         gender: formState.gender || '',
         bloodType: formState.bloodType || ''
       };
-      
-      // Make sure gender is one of the allowed enum values
+       
       if (basicInfoData.gender && !['male', 'female', 'other', 'prefer_not_to_say', 'prefer not to say'].includes(basicInfoData.gender)) {
         throw new Error('Invalid gender value. Please select a valid option.');
       }
-      
-      console.log("Sending basic info update:", basicInfoData);
-      
-      // Use the updateUserData function from the store
+       
+       
       const result = await updateUserData(basicInfoData);
       
-      if (result.success) {
-        // Success notification
+      if (result.success) { 
         alert("Basic information updated successfully!");
-      } else {
-        // Error notification
+      } else { 
         alert(`Failed to update: ${result.error}`);
       }
     } catch (error) {
@@ -619,31 +594,25 @@ const Profile = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    try {
-      // Clean the address object to make sure no undefined values are sent
+    try { 
       const cleanAddress = {};
       Object.keys(formState.address).forEach(key => {
         if (formState.address[key] !== undefined && formState.address[key] !== null) {
           cleanAddress[key] = formState.address[key];
         }
-      });
-      
-      // Extract only the contact info fields
+      }); 
+
       const contactInfoData = {
         phone: formState.phone || '',
         address: cleanAddress
       };
-      
-      console.log("Sending contact info update:", contactInfoData);
-      
-      // Use the updateUserData function from the store
+       
+       
       const result = await updateUserData(contactInfoData);
       
-      if (result.success) {
-        // Success notification
+      if (result.success) { 
         alert("Contact information updated successfully!");
-      } else {
-        // Error notification
+      } else { 
         alert(`Failed to update: ${result.error}`);
       }
     } catch (error) {
@@ -658,35 +627,28 @@ const Profile = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    try {
-      // Clean the medical info object to ensure no undefined values
+    try { 
       const cleanMedicalInfo = {};
       Object.keys(formState.medicalInfo).forEach(key => {
         if (formState.medicalInfo[key] !== undefined && formState.medicalInfo[key] !== null) {
-          // Convert empty strings to null for number fields
+          
           if ((key === 'height' || key === 'weight') && formState.medicalInfo[key] === '') {
             cleanMedicalInfo[key] = null;
           } else {
             cleanMedicalInfo[key] = formState.medicalInfo[key];
           }
         }
-      });
-      
-      // Extract only the medical info fields
+      }); 
       const medicalInfoData = {
         medicalInfo: cleanMedicalInfo
       };
-      
-      console.log("Sending medical info update:", medicalInfoData);
-      
-      // Use the updateUserData function from the store
+       
+        
       const result = await updateUserData(medicalInfoData);
       
-      if (result.success) {
-        // Success notification
+      if (result.success) { 
         alert("Medical information updated successfully!");
-      } else {
-        // Error notification
+      } else { 
         alert(`Failed to update: ${result.error}`);
       }
     } catch (error) {
@@ -1390,10 +1352,7 @@ const Profile = () => {
                                     } 
                                     alt="Aadhar Card" 
                                     className="w-full max-h-48 object-cover" 
-                                    onError={(e) => {
-                                      console.log("KYC image failed to load, using fallback");
-                                      e.target.src = '/placeholder-document.png';
-                                    }}
+                                   
                                   />
                                 </div>
                               </div>
@@ -1460,7 +1419,7 @@ const Profile = () => {
                             <p>Your KYC verification is currently being reviewed by our team. This typically takes 1-2 business days.</p>
                           </div>
                           
-                          {/* Check both formState.kycDocuments.aadharCard and formState.kycDocument.url */}
+                          
                           {(formState.kycDocuments?.aadharCard || formState.kycDocument?.url) && (
                             <div className="mt-4">
                               <h4 className="text-sm font-medium text-yellow-800">Submitted Document</h4>
@@ -1472,11 +1431,7 @@ const Profile = () => {
                                     (typeof formState.kycDocuments?.aadharCard === 'string' ? formState.kycDocuments.aadharCard : null)
                                   }
                                   alt="Aadhar Card" 
-                                  className="w-full max-h-48 object-cover" 
-                                  onError={(e) => {
-                                    console.log("KYC image failed to load, using fallback");
-                                    e.target.src = '/placeholder-document.png';
-                                  }}
+                                  className="w-full max-h-48 object-cover"  
                                 />
                               </div>
                             </div>

@@ -107,8 +107,7 @@ const OrganRequest = () => {
         // Ensure recipientAge is a string
         recipientAge: formData.recipientAge ? formData.recipientAge.toString() : ''
       };
-      
-      console.log('Submitting request data:', requestData);
+       
       
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
       const response = await axios.post(`${API_URL}/requests`, requestData, {

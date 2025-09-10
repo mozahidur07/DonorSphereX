@@ -99,47 +99,38 @@ const Requests = () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
         const userId = currentUser.userId;
-        
-        // Validate userId format
+         
         if (!userId || !userId.startsWith('LD-')) {
           console.error('Invalid userId format:', userId);
           throw new Error('Invalid user ID format');
-        }
+        } 
         
-        // Get the authentication token
         const token = localStorage.getItem('authToken');
         if (!token) {
           throw new Error('Authentication token not found');
         }
-        
-        console.log('Fetching requests for user:', userId);
-        
-        // Use the working endpoint that accepts userId as a parameter
-        // This endpoint already exists and works correctly based on the code review
+         
+         
         const response = await axios.get(`${API_URL}/requests`, {
           params: { 
-            userId: userId  // Filter by the user's ID
+            userId: userId 
           },
           headers: {
             'Authorization': `Bearer ${token}`,
             'Cache-Control': 'no-cache, no-store, must-revalidate'
           }
         });
+         
         
-        console.log('Request response:', response.data);
-        
-        if (response.data.status === 'success') {
-          // Use real data from the database
-          setRequests(response.data.data || []);
-          console.log('Requests loaded:', response.data.data?.length || 0);
+        if (response.data.status === 'success') { 
+          setRequests(response.data.data || []); 
         } else {
           throw new Error(response.data.message || 'Failed to fetch requests');
         }
       } catch (err) {
         console.error('Error fetching user requests:', err);
         setError(`Failed to load your requests: ${err.message}`);
-        
-        // No dummy data as requested
+         
         setRequests([]);
       } finally {
         setLoading(false);

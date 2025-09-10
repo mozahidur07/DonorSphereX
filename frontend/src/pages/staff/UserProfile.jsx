@@ -42,29 +42,17 @@ const UserProfile = () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
       const token = localStorage.getItem('authToken');
-      
-      // Map our frontend status values to backend expected values
+       
       let backendStatus = kycStatus;
       if (kycStatus === 'completed') {
-        backendStatus = 'approved'; // backend expects 'approved' instead of 'completed'
-      }
-      // Keep not_submitted as is - no need to map
-      
-      // Build the payload with the expected field names as per backend
+        backendStatus = 'approved'; 
+      } 
       const payload = {
         status: backendStatus,
-        rejection_reason: kycRejectionReason || "" // Always include, even if empty
+        rejection_reason: kycRejectionReason || ""  
       };
       
-      console.log("Original KYC status selected:", kycStatus);
-      console.log("Mapped backend status:", backendStatus);
-      console.log("Updating KYC with payload:", payload);
-      console.log("Making request to:", `${API_URL}/staff/users/${userId}/kyc`);
-      
-      console.log("Sending KYC update request with headers:", {
-        Authorization: `Bearer ${token.substring(0, 15)}...`,
-        'Content-Type': 'application/json'
-      });
+ 
       
       const response = await axios.patch(`${API_URL}/staff/users/${userId}/kyc`, payload, {
         headers: {
@@ -72,27 +60,22 @@ const UserProfile = () => {
           'Content-Type': 'application/json'
         }
       });
-      
-      console.log("KYC update response:", response.data);
+       
       
       if (response.data.status === 'success') {
         toast.success('KYC status updated successfully');
         setShowKycModal(false);
-        
-        // Add a small delay before fetching updated data to ensure it's refreshed
+         
         setTimeout(() => {
-          fetchUserData(); // Refresh user data
+          fetchUserData();  
         }, 1000);
       } else {
         throw new Error('Failed to update KYC status');
       }
     } catch (err) {
       console.error("Error updating KYC status:", err);
-      
-      // More detailed error handling
-      if (err.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
+       
+      if (err.response) { 
         console.error("Server response error data:", err.response.data);
         console.error("Server response error status:", err.response.status);
         
@@ -105,12 +88,10 @@ const UserProfile = () => {
         } else {
           toast.error(err.response.data.message || 'Failed to update KYC status');
         }
-      } else if (err.request) {
-        // The request was made but no response was received
+      } else if (err.request) { 
         console.error("No response received:", err.request);
         toast.error('Server did not respond. Please check your network connection.');
-      } else {
-        // Something happened in setting up the request that triggered an Error
+      } else { 
         toast.error('Failed to update KYC status: ' + err.message);
       }
     } finally {
@@ -118,23 +99,19 @@ const UserProfile = () => {
     }
   };
   
-  const openKycModal = () => {
-    // Map 'approved' status to 'completed' for the frontend dropdown
+  const openKycModal = () => { 
     let initialStatus = '';
-    
-    // Check for both potential field names in the user object
+     
     if (user.kycStatus) {
       initialStatus = user.kycStatus;
     } else if (user.kyc_status) {
       initialStatus = user.kyc_status;
     }
-    
-    // Map 'approved' status to 'completed' for the frontend dropdown
+     
     if (initialStatus === 'approved') {
       initialStatus = 'completed';
     }
-    
-    console.log("Opening KYC modal with initial status:", initialStatus, "from user status:", user.kycStatus || user.kyc_status);
+     
     
     setKycStatus(initialStatus);
     setKycRejectionReason(user.kyc_rejection_reason || '');
@@ -148,25 +125,16 @@ const UserProfile = () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
       const token = localStorage.getItem('authToken');
+       
       
-      console.log("Fetching user data for userId:", userId);
-      
-      // Fetch user profile by userId
       const userResponse = await axios.get(`${API_URL}/staff/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
-      });
+      }); 
       
-      console.log("User data response:", userResponse.data);
-      
-      if (userResponse.data.status === 'success') {
-        // Log detailed KYC data for debugging
-        const userData = userResponse.data.data;
-        console.log("User KYC status from API:", userData.kycStatus || userData.kyc_status);
-        console.log("KYC document details:", userData.kycDocument);
-        console.log("KYC documents collection:", userData.kycDocuments);
-        console.log("KYC rejection reason:", userData.kyc_rejection_reason);
+      if (userResponse.data.status === 'success') { 
+        const userData = userResponse.data.data; 
         
         setUser(userData);
         

@@ -149,8 +149,7 @@ export const AIProvider = ({ children, userId }) => {
       
       if (!token) return [];
       
-      const userId = currentUser.userId;
-      console.log('AIProvider - Fetching requests for user:', userId);
+      const userId = currentUser.userId; 
       
       // Add a timestamp to prevent caching issues
       const timestamp = Date.now();
@@ -168,17 +167,14 @@ export const AIProvider = ({ children, userId }) => {
         
         if (response.ok) {
           const data = await response.json();
-          if (data.status === 'success') {
-            console.log('AIProvider - Successfully fetched requests using /requests?userId=', data.data?.length || 0);
+          if (data.status === 'success') { 
             return data.data || [];
           }
         }
       } catch (err) {
         console.error('AIProvider - Error with first request method:', err);
       }
-      
-      // If that fails, try the /requests/user/:userId endpoint as fallback
-      console.log('AIProvider - Trying fallback endpoint /requests/user/:userId');
+       
       try {
         const response = await fetch(`${API_URL}/requests/user/${userId}?_=${timestamp}`, {
           headers: {
@@ -190,8 +186,7 @@ export const AIProvider = ({ children, userId }) => {
         });
         
         if (response.ok) {
-          const data = await response.json();
-          console.log('AIProvider - Fallback response:', data.data?.length || 0);
+          const data = await response.json(); 
           return data.status === 'success' ? data.data : [];
         }
       } catch (fallbackErr) {
@@ -199,8 +194,7 @@ export const AIProvider = ({ children, userId }) => {
       }
       
       // Try one more approach - get from /my-requests endpoint
-      try {
-        console.log('AIProvider - Trying second fallback endpoint /my-requests');
+      try { 
         const response = await fetch(`${API_URL}/requests/my-requests?_=${timestamp}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -211,15 +205,13 @@ export const AIProvider = ({ children, userId }) => {
         });
         
         if (response.ok) {
-          const data = await response.json();
-          console.log('AIProvider - Second fallback response:', data.data?.length || 0);
+          const data = await response.json(); 
           return data.status === 'success' ? data.data : [];
         }
       } catch (secondFallbackErr) {
         console.error('AIProvider - Error with second fallback request method:', secondFallbackErr);
       }
-      
-      console.log('AIProvider - All request methods failed');
+       
       return [];
     } catch (error) {
       console.error('AIProvider - Error fetching user requests:', error);
@@ -263,8 +255,7 @@ export const AIProvider = ({ children, userId }) => {
           const requests = await fetchUserRequests();
           const donationHistory = await fetchDonationHistory();
           
-          console.log("Fetched donation history for AI:", donationHistory);
-          console.log("Fetched requests for AI:", requests);
+       
           
           // Sanitize and structure user data for AI context
           const sanitizedUserData = {
@@ -581,15 +572,13 @@ export const AIProvider = ({ children, userId }) => {
       
       // Prepare context for AI
       const systemMessage = updatedConversation.messages.find(m => m.role === 'system');
-      
-      // Parse the system message to get the current instructions and contexts
+       
       let systemMessageContent;
       try {
         systemMessageContent = JSON.parse(systemMessage.content);
-        
-        // Ensure we're using the most up-to-date user context with all requests
+         
         if (userContext && userContext.requests && userContext.requests.length > 0) {
-          console.log('Ensuring all user requests are included in context:', userContext.requests.length);
+          
           systemMessageContent.userContext = {
             ...systemMessageContent.userContext,
             requests: userContext.requests
@@ -661,9 +650,7 @@ export const AIProvider = ({ children, userId }) => {
       try {
         let aiResponse;
         
-        try {
-          // Try OpenAI first
-          console.log('Trying with OpenAI API...');
+        try {  
           const openai = new OpenAI({
             apiKey: OPENAI_API_KEY, 
             dangerouslyAllowBrowser: true, 
@@ -679,11 +666,9 @@ export const AIProvider = ({ children, userId }) => {
             temperature: 0.7,
             max_tokens: 800
           });
-          
-          // Extract response from OpenAI
+           
           aiResponse = completion.choices[0].message.content;
-          console.log('OpenAI response successful');
-          // Reset to OpenAI in case we were previously using OpenRouter
+          console.log('OpenAI response successful'); 
           setUseOpenRouter(false);
           
         } catch (openaiError) {
@@ -727,15 +712,10 @@ export const AIProvider = ({ children, userId }) => {
             setConversations(prev => 
               prev.map(c => c.id === notificationConversation.id ? notificationConversation : c)
             );
-            
-            // No need to save this temporary message to IndexedDB
-          }
-          
-          // Map our model to OpenRouter compatible model using our helper function
-          const openRouterModel = mapToOpenRouterModel(aiModel);
-          console.log(`Mapping model ${aiModel} to OpenRouter model: ${openRouterModel}`);
-          
-          // Set state to indicate we're using OpenRouter now
+             
+          } 
+          const openRouterModel = mapToOpenRouterModel(aiModel); 
+           
           setUseOpenRouter(true);
           
           // Call OpenRouter API
@@ -749,19 +729,17 @@ export const AIProvider = ({ children, userId }) => {
             },
             body: JSON.stringify({
               "model": openRouterModel,
-              "messages": [
-                // Add a special instruction to ensure proper JSON formatting
+              "messages": [ 
                 {
                   role: "system",
                   content: "IMPORTANT: Your response must be valid JSON in this exact format: {\"answer\": \"Your helpful response here\", \"suggestedQuestions\": [\"Question 1\", \"Question 2\", \"Question 3\"]}. Do not include any explanations or formatting outside of this JSON structure."
-                },
-                // Then include all the original messages
+                }, 
                 ...messagesToSend.map(m => ({
                   role: m.role,
                   content: m.content
                 }))
               ],
-              "temperature": 0.5, // Lower temperature for more predictable formatting
+              "temperature": 0.5,
               "max_tokens": 800
             })
           });
@@ -773,16 +751,11 @@ export const AIProvider = ({ children, userId }) => {
           const openRouterData = await openRouterResponse.json();
           // Get the raw response content from OpenRouter
           const rawResponse = openRouterData.choices[0].message.content;
-          
-          // Format the raw response as valid JSON to ensure it parses correctly in the UI
-          try {
-            // First try to parse it as JSON (in case it's already valid)
-            let parsedResponse = JSON.parse(rawResponse);
-            // Then re-stringify to ensure proper format
+           
+          try { 
+            let parsedResponse = JSON.parse(rawResponse); 
             aiResponse = JSON.stringify(parsedResponse);
-          } catch (jsonError) {
-            // If the response isn't valid JSON, construct a properly formatted JSON
-            console.log('OpenRouter response was not valid JSON, formatting it properly', jsonError);
+          } catch (jsonError) { 
             aiResponse = JSON.stringify({
               answer: rawResponse,
               suggestedQuestions: [
@@ -791,11 +764,9 @@ export const AIProvider = ({ children, userId }) => {
                 "How do I request blood?"
               ]
             });
-          }
-          console.log('Successfully got and formatted response from OpenRouter fallback');
+          } 
         }
-        
-        // Add AI response to conversation (whether from OpenAI or OpenRouter)
+         
         const messagesWithResponse = [
           ...updatedConversation.messages,
           { role: 'assistant', content: aiResponse, time: new Date().toISOString() }
@@ -803,12 +774,10 @@ export const AIProvider = ({ children, userId }) => {
         
         const finalConversation = {
           ...updatedConversation,
-          messages: messagesWithResponse,
-          // Generate or update title based on conversation content
+          messages: messagesWithResponse, 
           title: generateTitle(messagesWithResponse.filter(m => m.role === 'user'))
         };
-        
-        // Update state and IndexedDB
+         
         setConversations(prev => 
           prev.map(c => c.id === finalConversation.id ? finalConversation : c)
         );
@@ -879,8 +848,7 @@ export const AIProvider = ({ children, userId }) => {
   // Save the last active conversation ID whenever it changes
   useEffect(() => {
     if (currentConversationId) {
-      localStorage.setItem('lastActiveConversationId', currentConversationId);
-      console.log('Saved active conversation ID:', currentConversationId);
+      localStorage.setItem('lastActiveConversationId', currentConversationId); 
     }
   }, [currentConversationId]);
 

@@ -68,7 +68,7 @@ const AboutPage = () => {
               <li>People in general good health with no active infections</li>
             </ul>
             <Link 
-              to="/donate" 
+              to="/donation/blood" 
               className="inline-block mt-2 px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-300"
             >
               Donate Blood
@@ -90,7 +90,7 @@ const AboutPage = () => {
               <li>Non-directed donation (to anyone in need)</li>
             </ul>
             <Link 
-              to="/donate" 
+              to="/donation/organ" 
               className="inline-block mt-2 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300"
             >
               Pledge Organs

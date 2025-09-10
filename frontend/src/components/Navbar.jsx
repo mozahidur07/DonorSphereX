@@ -62,7 +62,11 @@ const Navbar = () => {
             <button
               className="bg-white text-[#2086BE] hover:bg-sky-50 font-semibold px-6 py-2 rounded-full transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center space-x-1"
               onMouseEnter={() => setShowDropdown(true)}
-              onMouseLeave={() => setShowDropdown(false)}
+              onMouseLeave={() => {
+                setTimeout(() => {
+                  setShowDropdown(false);
+                }, 5000);
+              }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -96,13 +100,12 @@ const Navbar = () => {
               <div
                 className="absolute right-0 mt-2 w-48 bg-white shadow-xl rounded-lg py-2 z-10 border border-gray-100 transform transition-all duration-300 origin-top-right"
                 onMouseEnter={() => setShowDropdown(true)}
-                onMouseLeave={() => setShowDropdown(false)}
+                onMouseLeave={() => {
+                  setTimeout(() => {
+                    setShowDropdown(false);
+                  }, 5000);
+                }}
               >
-                <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-500">
-                    Welcome to Life Donor
-                  </p>
-                </div>
                 <Link
                   to="/signin"
                   className="flex items-center px-4 py-3 text-gray-700 hover:bg-sky-50 hover:text-[#2086BE] transition-colors"

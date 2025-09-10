@@ -107,8 +107,6 @@ const OrganDonation = () => {
         delete donationData.userId;
       }
       
-      console.log('Using auth token:', token);
-      console.log('Sending donation data:', JSON.stringify(donationData));
       
       const response = await axios.post(`${API_URL}/donations`, donationData, {
         headers: {

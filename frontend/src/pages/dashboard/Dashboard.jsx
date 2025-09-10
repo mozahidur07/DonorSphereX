@@ -350,8 +350,7 @@ const StaffDashboard = () => {
               'Cache-Control': 'no-cache, no-store, must-revalidate'
             }
           });
-          
-          console.log('User data response:', userDataResponse);
+           
           
           if (userDataResponse.data && userDataResponse.data.status === 'success') {
             setUserData(userDataResponse.data.data);
@@ -359,29 +358,23 @@ const StaffDashboard = () => {
           
           // Fetch donation history
           const donationsResponse = await apiGet('donations');
-          
-          console.log('Donations response:', donationsResponse);
+           
           
           if (donationsResponse.data && donationsResponse.data.status === 'success') {
             setDonationHistory(donationsResponse.data.data || []);
           }
+           
           
-          // Fetch user requests using the working endpoint
-          console.log('Dashboard - Fetching requests for user:', userId);
-          
-          try {
-            // Use the direct query parameter approach first (which we know works)
+          try { 
             const requestsResponse = await apiGet('requests', {
               params: { userId: userId },
               headers: {
                 'Cache-Control': 'no-cache, no-store, must-revalidate'
               }
             });
-            
-            console.log('Requests response:', requestsResponse);
+             
             
             if (requestsResponse.data && requestsResponse.data.status === 'success') {
-              console.log('Dashboard - Successfully fetched requests:', requestsResponse.data.data?.length || 0);
               setUserRequests(requestsResponse.data.data || []);
             }
           } catch (requestError) {
@@ -394,11 +387,10 @@ const StaffDashboard = () => {
                   'Cache-Control': 'no-cache, no-store, must-revalidate'
                 }
               });
-              
-              console.log('Fallback response:', fallbackResponse);
+               
               
               if (fallbackResponse.data && fallbackResponse.data.status === 'success') {
-                console.log('Dashboard - Fallback request succeeded:', fallbackResponse.data.data?.length || 0);
+               
                 setUserRequests(fallbackResponse.data.data || []);
               }
             } catch (fallbackError) {

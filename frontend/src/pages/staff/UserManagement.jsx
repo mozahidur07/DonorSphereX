@@ -42,8 +42,7 @@ const UserManagement = () => {
       });
       
       if (response.data.status === 'success') {
-        setUsers(response.data.data || []);
-        console.log("Fetched users:", response.data.data);
+        setUsers(response.data.data || []); 
         
       }
     } catch (err) {

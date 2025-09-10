@@ -7,7 +7,6 @@ const SignIn = () => {
   const navigate = useNavigate();
   const { login, error: authError, setError: setAuthError, currentUser } = useAuth();
   
-  // Redirect to profile if user is already logged in
   useEffect(() => {
     if (currentUser) {
       navigate('/profile');
@@ -20,16 +19,14 @@ const SignIn = () => {
     password: '',
     showPassword: false,
     rememberMe: false,
-    role: 'donor' // Default role is donor
+    role: 'donor' 
   });
   
-  // Load saved login data if available
   useEffect(() => {
     const savedLoginData = localStorage.getItem('rememberedLogin');
     
     if (savedLoginData) {
       try {
-        // Decrypt the saved data
         const decryptedBytes = CryptoJS.AES.decrypt(savedLoginData, REMEMBER_ME_SECRET_KEY);
         const decryptedData = JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
         
@@ -41,12 +38,9 @@ const SignIn = () => {
             password: decryptedData.password || '',
             role: decryptedData.role || 'donor',
             rememberMe: true
-          }));
-          console.log('Auto-filled login data from remembered login');
+          })); 
         } else {
-          // Remove expired data
-          localStorage.removeItem('rememberedLogin');
-          console.log('Removed expired remembered login data');
+          localStorage.removeItem('rememberedLogin'); 
         }
       } catch (error) {
         console.error('Error decrypting saved login data:', error);
@@ -78,53 +72,40 @@ const SignIn = () => {
     try {
       setLoading(true);
       
-      // Call login function from auth context
-      console.log('Attempting login with:', { email: formData.email, role: formData.role });
       const result = await login(formData.email, formData.password, formData.role);
-      console.log('Login result:', result);
+      // console.log('Login result:', result);
       
       if (result && result.success) {
-        // Check if the role matches
         if (result.roleMatched === false) {
-          // Show error if role doesn't match
           const correctRole = result.userRole || 'donor';
           setAuthError(`Role mismatch! Please use "${correctRole}" role to login with this account.`);
           return;
         }
         
-        // Save login information if "Remember Me" is checked
         if (formData.rememberMe) {
-          // Create an object with the login data
           const loginData = {
             email: formData.email,
             password: formData.password,
             role: formData.role,
-            expiry: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days from now
+            expiry: Date.now() + (30 * 24 * 60 * 60 * 1000)
           };
           
-          // Encrypt the login data
           const encryptedData = CryptoJS.AES.encrypt(
             JSON.stringify(loginData),
             REMEMBER_ME_SECRET_KEY
           ).toString();
           
-          // Save in localStorage
-          localStorage.setItem('rememberedLogin', encryptedData);
-          console.log('Login data saved for "Remember Me"');
+          localStorage.setItem('rememberedLogin', encryptedData); 
         } else {
-          // Remove any existing remembered login if checkbox is unchecked
           localStorage.removeItem('rememberedLogin');
         }
         
-        // Display successful login message
-        alert('Login successful! Welcome back to Life Donor.');
+        alert('Login successful! Welcome back to DonorSphereX.');
         
-        // Check if this is a new IP and display warning if needed
         if (result.isNewIP) {
           alert('We noticed you\'re logging in from a new location. If this wasn\'t you, please reset your password immediately.');
         }
         
-        // Redirect to profile with a slight delay to ensure context is updated
         setTimeout(() => {
           navigate('/profile');
         }, 100);
@@ -138,20 +119,19 @@ const SignIn = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FEE8E8] py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-lg w-full space-y-8 bg-white rounded-2xl shadow-xl p-8 border border-red-100 relative overflow-hidden">
-        {/* Background decorative elements */}
+      <div className="max-w-lg w-full space-y-8 bg-white rounded-2xl shadow-xl p-3 md:p-8 border border-red-100 relative overflow-hidden">
+      
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-red-100 rounded-full opacity-50"></div>
         <div className="absolute top-40 -left-10 w-24 h-24 bg-red-100 rounded-full opacity-50"></div>
         <div className="absolute bottom-10 right-10 w-32 h-32 bg-red-100 rounded-full opacity-40"></div>
         
-        {/* Blood drop icon decoration - top left */}
+    
         <div className="absolute top-0 left-0 text-red-200 opacity-30 transform -translate-x-1/2 -translate-y-1/2">
           <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
           </svg>
         </div>
-        
-        {/* Heart icon decoration - bottom right */}
+         
         <div className="absolute bottom-0 right-0 text-red-200 opacity-30 transform translate-x-1/4 translate-y-1/4">
           <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -166,7 +146,7 @@ const SignIn = () => {
               </svg>
             </div>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Welcome Back to Life Donor</h2>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Welcome Back to DonorSphereX</h2>
           <div className="mt-2 text-center text-sm text-gray-600 flex justify-center items-center space-x-1">
             <span>Or</span>
             <Link to="/signup" className="font-medium text-red-600 hover:text-red-800 transition-colors duration-300 flex items-center">
@@ -189,7 +169,7 @@ const SignIn = () => {
                 Email address
               </label>
               <div className="relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute hidden md:flex inset-y-0 left-0 pl-3  items-center pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
@@ -201,7 +181,7 @@ const SignIn = () => {
                   type="email"
                   autoComplete="email"
                   required
-                  className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
+                  className="appearance-none block w-full pl-2 md:pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
                   placeholder="Enter your email address"
                   value={formData.email}
                   onChange={handleChange}
@@ -217,7 +197,7 @@ const SignIn = () => {
                 Password
               </label>
               <div className="relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 hidden md:flex items-center pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                   </svg>
@@ -227,7 +207,7 @@ const SignIn = () => {
                   name="password"
                   type={formData.showPassword ? "text" : "password"}
                   required
-                  className="appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
+                  className="appearance-none block w-full pl-2 md:pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 sm:text-sm bg-white bg-opacity-70 backdrop-filter backdrop-blur-sm"
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}
@@ -404,7 +384,7 @@ const SignIn = () => {
                 <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
               </svg>
             </div>
-            <p className="text-xs text-gray-500">Life Donor © {new Date().getFullYear()} All rights reserved.</p>
+            <p className="text-xs text-gray-500">DonorSphereX © {new Date().getFullYear()} All rights reserved.</p>
           </div>
         </form>
       </div>

@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
 import api, { apiGet, apiPost, apiPut, apiDelete } from './api';
-
-// Custom hook for API requests with loading and error states
+ 
 export const useApi = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);

@@ -54,11 +54,9 @@ const RequestManagement = () => {
       
       // Add search by ID or email functionality
       if (filters.searchQuery && filters.searchField) {
-        params[filters.searchField] = filters.searchQuery.trim();
-        console.log(`Searching by ${filters.searchField}: "${filters.searchQuery.trim()}"`);
+        params[filters.searchField] = filters.searchQuery.trim(); 
       }
-      
-      console.log('Fetching requests with params:', params);
+       
       
       // Use the requests from the staffRoutes endpoint instead of direct requests endpoint
       const response = await axios.get(`${API_URL}/staff/requests`, {
@@ -67,15 +65,11 @@ const RequestManagement = () => {
         },
         params: params
       });
-      
-      console.log('Response data:', response.data);
+       
       
       if (response.data.status === 'success') {
         setRequests(response.data.data || []);
-        // Show message if search returned no results
-        if (response.data.data.length === 0 && filters.searchQuery) {
-          console.log(`No results found for ${filters.searchField} search: "${filters.searchQuery}"`);
-        }
+   
       } else {
         setError('Failed to fetch requests. Please try again.');
       }

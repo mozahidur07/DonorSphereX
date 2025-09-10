@@ -2,16 +2,14 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-// Create an axios instance with the base URL
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 30000, // 30 second timeout
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
-
-// Add a request interceptor to add the auth token to all requests
+ 
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('authToken');
@@ -24,12 +22,9 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
-// Add a response interceptor for error handling
+ 
 api.interceptors.response.use(
   (response) => {
-    // Log the API response for debugging purposes
-    console.log('API Response:', response.config.method, response.config.url, response.data);
     
     // Check if we got a proper response structure with status field
     if (response.data && typeof response.data === 'object') {

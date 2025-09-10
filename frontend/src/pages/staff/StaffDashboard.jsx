@@ -59,8 +59,7 @@ const StaffDashboard = () => {
       });
       
       if (dashboardResponse.data.status === 'success') {
-        const data = dashboardResponse.data.data;
-        console.log("Dashboard Data:", data);
+        const data = dashboardResponse.data.data; 
         
         setStats({
           totalUsers: data.userCount || 0,
@@ -73,27 +72,23 @@ const StaffDashboard = () => {
           kycCompleted: data.kycCompletedCount || 0
         });
         
-        setRecentUsers(data.recentUsers || []);
-        console.log("Recent Users Data:", data.recentUsers || []);
+        setRecentUsers(data.recentUsers || []); 
 
         setRecentDonations(data.recentDonations || []);
         setRecentRequests(data.recentRequests || []);
         
         // Store the list of user IDs with pending KYC verification
-        if (data.pendingKycUserIds && data.pendingKycUserIds.length > 0) {
-          console.log(`Received ${data.pendingKycUserIds.length} pending KYC user IDs`);
+        if (data.pendingKycUserIds && data.pendingKycUserIds.length > 0) { 
           setPendingKycUserIds(data.pendingKycUserIds);
         }
         
         // Store the detailed list of users with pending KYC verification
-        if (data.pendingKycUsers && data.pendingKycUsers.length > 0) {
-          console.log(`Received ${data.pendingKycUsers.length} pending KYC users`);
+        if (data.pendingKycUsers && data.pendingKycUsers.length > 0) { 
           setPendingKycUsers(data.pendingKycUsers);
         }
         
         // Store the list of users with completed KYC verification
-        if (data.completedKycUsers && data.completedKycUsers.length > 0) {
-          console.log(`Received ${data.completedKycUsers.length} completed KYC users`);
+        if (data.completedKycUsers && data.completedKycUsers.length > 0) { 
           setCompletedKycUsers(data.completedKycUsers);
         }
         

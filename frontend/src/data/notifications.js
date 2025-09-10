@@ -5,8 +5,7 @@ export const fetchNotifications = async () => {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
     const token = localStorage.getItem('authToken');
 
-    if (!token) {
-      console.log('No token found, user not logged in');
+    if (!token) { 
       return { data: [], unreadCount: 0 };
     }
 
@@ -37,7 +36,6 @@ export const addAccountCreationNotification = async (userId) => {
     const token = localStorage.getItem('authToken');
 
     if (!token) {
-      console.log('No token found, user not logged in');
       return false;
     }
 
@@ -70,7 +68,6 @@ export const markNotificationAsRead = async (notificationId) => {
     const token = localStorage.getItem('authToken');
 
     if (!token) {
-      console.log('No token found, user not logged in');
       return false;
     }
 
@@ -97,7 +94,6 @@ export const markAllNotificationsAsRead = async () => {
     const token = localStorage.getItem('authToken');
 
     if (!token) {
-      console.log('No token found, user not logged in');
       return false;
     }
 
@@ -124,7 +120,6 @@ export const addBloodTypeUpdateNotification = async (bloodType) => {
     const token = localStorage.getItem('authToken');
 
     if (!token) {
-      console.log('No token found, user not logged in');
       return false;
     }
 
@@ -156,8 +151,7 @@ export const addProfileUpdateNotification = async (updateType) => {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
     const token = localStorage.getItem('authToken');
 
-    if (!token) {
-      console.log('No token found, user not logged in');
+    if (!token) { 
       return false;
     }
 
