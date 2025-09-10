@@ -18,12 +18,8 @@ DonorSphereX is a comprehensive web platform designed to connect blood and organ
 
 ## Demo Video
 
-<p align="center">
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/aZb0iu4uGwA?si=IX10d2duYib3yO4v" title="DonorSphereX Demo" frameborder="1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
-
-
-
+[Watch the Demo Video]() (Coming Soon)
+ 
 ## Features
 
 - **User Authentication**: Secure login and registration system with JWT authentication
