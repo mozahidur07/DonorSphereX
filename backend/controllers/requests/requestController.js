@@ -5,16 +5,34 @@ const AppError = require('../../utils/appError');
 exports.createRequest = async (req, res, next) => {
   try {
     const userId = req.user.userId;
+    
+    // Log incoming request data for debugging
+    console.log('Creating request with data:', JSON.stringify(req.body, null, 2));
      
     const requestData = {
       ...req.body,
-      userId
+      userId,
+      userObjectId: req.user._id // Make sure the user's MongoDB ID is included
     };
+    
+    // Check for any 'b' references that might be undefined
+    if (!requestData.type) {
+      return next(new AppError('Request type is required', 400));
+    }
+    
+    if (requestData.type === 'blood' && !requestData.bloodType) {
+      return next(new AppError('Blood type is required for blood requests', 400));
+    }
+    
+    if (requestData.type === 'organ' && !requestData.organ) {
+      return next(new AppError('Organ type is required for organ requests', 400));
+    }
      
     const request = await Request.create(requestData);
+    console.log('Request created successfully:', request._id);
      
     await User.findByIdAndUpdate(
-      userId,
+      req.user._id, // Use MongoDB _id for this operation
       { $push: { requestHistory: request._id } },
       { new: true }
     );
@@ -24,7 +42,15 @@ exports.createRequest = async (req, res, next) => {
       data: request
     });
   } catch (error) {
-    next(new AppError(error.message, 400));
+    console.error('Error creating request:', error);
+    
+    // Provide more detailed error message
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return next(new AppError(`Validation error: ${messages.join(', ')}`, 400));
+    }
+    
+    next(new AppError(`Failed to create request: ${error.message}`, 400));
   }
 };
 
