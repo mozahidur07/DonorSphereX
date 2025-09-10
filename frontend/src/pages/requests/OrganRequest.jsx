@@ -94,18 +94,24 @@ const OrganRequest = () => {
     setSubmitMessage({ type: '', message: '' });
     
     try {
-      // Create a modified request object that matches backend schema
+      // Based on the Request.js model, create a request that matches the schema exactly
       const requestData = {
-        ...formData,
-        // Map fields to match backend schema
-        organ: formData.organType,  // Backend uses "organ" instead of "organType"
-        urgency: formData.urgency.toLowerCase(), // Convert to lowercase to match enum
-        medicalNotes: formData.additionalNotes,
-        // Add any additional required fields from schema
-        type: 'organ', // Use the value the schema expects
-        subType: 'Organ Request', // Store the display name in subType
-        // Ensure recipientAge is a string
-        recipientAge: formData.recipientAge ? formData.recipientAge.toString() : ''
+        requestId: formData.requestId,
+        type: "organ", // Must match the enum values in the schema
+        organ: formData.organType,  // Required for organ requests
+        bloodType: formData.bloodType,
+        urgency: formData.urgency.toLowerCase(),
+        isForSelf: Boolean(formData.isForSelf),
+        patientName: !formData.isForSelf ? formData.patientName : undefined,
+        recipientAge: formData.recipientAge ? formData.recipientAge.toString() : "",
+        location: formData.location || "",
+        nearestHospital: formData.nearestHospital,
+        doctorName: formData.doctorName,
+        doctorContact: formData.doctorContact,
+        medicalCondition: formData.medicalCondition,
+        medicalNotes: formData.additionalNotes || "",
+        status: "pending",
+        subType: "Organ Request"
       };
        
       
@@ -146,9 +152,31 @@ const OrganRequest = () => {
       }
     } catch (err) {
       console.error('Error submitting organ request:', err);
+      
+      // Log more detailed error information
+      console.error('Error details:', {
+        message: err.message,
+        stack: err.stack,
+        response: err.response?.data
+      });
+      
+      let errorMessage = 'Failed to submit your request. Please try again later.';
+      
+      if (err.response?.data?.message) {
+        errorMessage = `Server error: ${err.response.data.message}`;
+      } else if (err.message) {
+        errorMessage = `Error: ${err.message}`;
+      }
+      
+      // Check specifically for "b is not defined" error
+      if (err.message?.includes('b is not defined')) {
+        errorMessage = 'There is a problem with the form data. Please check all fields and try again.';
+        console.error('Detected "b is not defined" error - likely an issue with data formatting');
+      }
+      
       setSubmitMessage({
         type: 'error',
-        message: err.response?.data?.message || 'Failed to submit your request. Please try again later.'
+        message: errorMessage
       });
     } finally {
       setIsLoading(false);
