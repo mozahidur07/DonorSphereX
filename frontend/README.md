@@ -123,4 +123,4 @@ The frontend development server will run on http://localhost:5173
 
 ## License
 
-This project is a open source and for educational purposes. No commercial use is allowed without permission.
+This project is open source and for educational purposes. No commercial use is allowed without permission.
