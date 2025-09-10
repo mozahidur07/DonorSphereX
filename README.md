@@ -14,7 +14,7 @@ DonorSphereX is a comprehensive web platform designed to connect blood and organ
 
 ## Live Demo
 
-[Visit DonorSphereX](https://donorspherex.vercel.app) (Coming Soon)
+[Visit DonorSphereX](https://donorspherex.vercel.app) 
 
 ## Demo Video
 
@@ -219,7 +219,7 @@ Detailed API documentation is available [here](https://documenter.getpostman.com
   <tr style="background:#333; color:#fff;">
     <th style="border:1px solid #555; padding:8px; text-align:left;">Name</th>
     <th style="border:1px solid #555; padding:8px; text-align:left;">Student ID</th>
-    <th style="border:1px solid #555; padding:8px; text-align:left;">Credits</th>
+    <th style="border:1px solid #555; padding:8px; text-align:left;">Credits/Role</th>
   </tr>
   <tr style="background:#111827; color:#fff;">
     <td style="border:1px solid #555; padding:8px;">Mozahidur Rahaman</td>
