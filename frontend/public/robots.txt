@@ -1,0 +1,17 @@
+# DonorSphereX Robots.txt
+User-agent: *
+Allow: /
+
+# Disallow private areas and authentication paths
+Disallow: /dashboard/*
+Disallow: /profile/*
+Disallow: /notifications/*
+Disallow: /admin/*
+Disallow: /api/*
+Disallow: /auth/*
+
+# Crawl delay to prevent server overload
+Crawl-delay: 10
+
+# Sitemap location
+Sitemap: https://donorspherex.vercel.app/sitemap.html
