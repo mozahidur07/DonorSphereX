@@ -80,27 +80,27 @@ app.use((req, res) => {
 });
 
 // Start server 
-// connectDB()
-//   .then(() => {
-//     app.listen(PORT, () => {
-//       console.log(`Server is running on http://localhost:${PORT}`);
-//       console.log('MongoDB connected successfully');
-//     });
-//   })
-//   .catch((err) => {
-//     console.error('Failed to connect to MongoDB', err);
-//     process.exit(1);
-//   });
-
-
 connectDB()
-
   .then(() => {
-    console.log('MongoDB connected successfully');
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+      console.log('MongoDB connected successfully');
+    });
   })
   .catch((err) => {
     console.error('Failed to connect to MongoDB', err);
     process.exit(1);
   });
+
+
+// connectDB()
+
+//   .then(() => {
+//     console.log('MongoDB connected successfully');
+//   })
+//   .catch((err) => {
+//     console.error('Failed to connect to MongoDB', err);
+//     process.exit(1);
+//   });
 
 module.exports = app;
