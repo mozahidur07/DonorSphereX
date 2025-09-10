@@ -272,7 +272,7 @@ Contributions to DonorSphereX are welcome! Please feel free to submit a Pull Req
 
 ## License
 
-This project is a open source and for educational purposes. No commercial use is allowed without permission.
+This project is open source and for educational purposes. No commercial use is allowed without permission.
 
 ---
 
