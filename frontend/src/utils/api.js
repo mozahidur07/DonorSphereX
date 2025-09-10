@@ -28,6 +28,22 @@ api.interceptors.request.use(
 // Add a response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
+    // Log the API response for debugging purposes
+    console.log('API Response:', response.config.method, response.config.url, response.data);
+    
+    // Check if we got a proper response structure with status field
+    if (response.data && typeof response.data === 'object') {
+      if (response.data.status === 'error') {
+        // If the API returns status: 'error', convert it to an axios error
+        return Promise.reject({ 
+          response: {
+            status: 400, 
+            data: response.data
+          }
+        });
+      }
+    }
+    
     return response;
   },
   (error) => {

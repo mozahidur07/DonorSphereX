@@ -39,6 +39,28 @@
     <!-- Theme color for browser -->
     <meta name="theme-color" content="#248CC4">
     
+    <!-- Handle client-side routing on page reload -->
+    <script type="text/javascript">
+      (function() {
+        // Don't run this in development
+        if (window.location.hostname === 'localhost' || 
+            window.location.hostname === '127.0.0.1') {
+          return;
+        }
+        
+        // If a direct hit on a route occurred, try to handle it
+        var path = window.location.pathname;
+        
+        // Save the path for React Router
+        if (path !== '/' && !path.includes('.')) {
+          try {
+            sessionStorage.setItem('redirectPath', path);
+          } catch (e) {
+            console.error('Failed to save redirect path:', e);
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

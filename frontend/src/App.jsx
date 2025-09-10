@@ -9,6 +9,7 @@ import WebsiteChatInterface from './components/WebsiteChatInterface';
 import ProtectedRoute from './components/ProtectedRoute';
 import UserDataLoader from './components/UserDataLoader';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import ApiDebugger from './utils/ApiDebugger';
 
 
 // Pages
@@ -73,6 +74,9 @@ const AppContent = () => {
       <div className={`flex flex-col min-h-screen ${showSidebar ? 'md:ml-16' : ''} w-full`}>
         {showNavbar && <Navbar />}
         <main className="flex-grow">
+          {/* API Debugger for development */}
+          <ApiDebugger />
+          
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />

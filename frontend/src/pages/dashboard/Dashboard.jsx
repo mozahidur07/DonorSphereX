@@ -351,15 +351,19 @@ const StaffDashboard = () => {
             }
           });
           
-          if (userDataResponse.status === 'success') {
-            setUserData(userDataResponse.data);
+          console.log('User data response:', userDataResponse);
+          
+          if (userDataResponse.data && userDataResponse.data.status === 'success') {
+            setUserData(userDataResponse.data.data);
           }
           
           // Fetch donation history
           const donationsResponse = await apiGet('donations');
           
-          if (donationsResponse.status === 'success') {
-            setDonationHistory(donationsResponse.data || []);
+          console.log('Donations response:', donationsResponse);
+          
+          if (donationsResponse.data && donationsResponse.data.status === 'success') {
+            setDonationHistory(donationsResponse.data.data || []);
           }
           
           // Fetch user requests using the working endpoint
@@ -374,9 +378,11 @@ const StaffDashboard = () => {
               }
             });
             
-            if (requestsResponse.status === 'success') {
-              console.log('Dashboard - Successfully fetched requests:', requestsResponse.data?.length || 0);
-              setUserRequests(requestsResponse.data || []);
+            console.log('Requests response:', requestsResponse);
+            
+            if (requestsResponse.data && requestsResponse.data.status === 'success') {
+              console.log('Dashboard - Successfully fetched requests:', requestsResponse.data.data?.length || 0);
+              setUserRequests(requestsResponse.data.data || []);
             }
           } catch (requestError) {
             console.error("Error fetching user requests:", requestError);
@@ -389,9 +395,11 @@ const StaffDashboard = () => {
                 }
               });
               
-              if (fallbackResponse.status === 'success') {
-                console.log('Dashboard - Fallback request succeeded:', fallbackResponse.data?.length || 0);
-                setUserRequests(fallbackResponse.data || []);
+              console.log('Fallback response:', fallbackResponse);
+              
+              if (fallbackResponse.data && fallbackResponse.data.status === 'success') {
+                console.log('Dashboard - Fallback request succeeded:', fallbackResponse.data.data?.length || 0);
+                setUserRequests(fallbackResponse.data.data || []);
               }
             } catch (fallbackError) {
               console.error("Fallback request also failed:", fallbackError);
