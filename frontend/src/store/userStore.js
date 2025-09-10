@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import { uploadFile } from '../utils/supabase';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+import api, { apiGet, apiPost, apiPut } from '../utils/api';
 
 const useUserStore = create((set, get) => ({
   userData: {
@@ -51,9 +50,8 @@ const useUserStore = create((set, get) => ({
     try {
       const cacheBuster = `?_=${Date.now()}`;
       
-      const response = await axios.get(`${API_URL}/profile${cacheBuster}`, {
+      const response = await apiGet(`profile${cacheBuster}`, {
         headers: { 
-          Authorization: `Bearer ${token}`,
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0'
@@ -116,9 +114,7 @@ const useUserStore = create((set, get) => ({
       
       console.log("Sending profile update:", JSON.stringify(sanitizedData, null, 2));
       
-      const response = await axios.put(`${API_URL}/profile/update`, sanitizedData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await apiPut('profile/update', sanitizedData);
       
       if (response.data.status === 'success') {
         console.log("Profile update success:", JSON.stringify(response.data.data, null, 2));
@@ -187,7 +183,7 @@ const useUserStore = create((set, get) => ({
         throw new Error(uploadResult.error || 'Failed to upload to Supabase');
       }
        
-      const response = await axios.put(`${API_URL}/profile/update`, 
+      const response = await apiPut('profile/update', 
         { 
           profilePicture: {
             url: uploadResult.data.publicUrl,
@@ -195,9 +191,6 @@ const useUserStore = create((set, get) => ({
             path: uploadResult.data.fullPath,
             uploadedAt: new Date().toISOString()
           }
-        }, 
-        {
-          headers: { Authorization: `Bearer ${token}` }
         }
       );
       
@@ -275,7 +268,7 @@ const useUserStore = create((set, get) => ({
       const cacheBustedUrl = `${uploadResult.data.publicUrl}?t=${Date.now()}`;
       console.log("Cache-busted URL:", cacheBustedUrl);
       
-      const response = await axios.post(`${API_URL}/profile/update-kyc`, 
+      const response = await apiPost('profile/update-kyc', 
         { 
           documentUrl: cacheBustedUrl,
           fileName: uploadResult.data.fileName,
@@ -283,9 +276,6 @@ const useUserStore = create((set, get) => ({
           originalName: kycFile.name,
           mimetype: kycFile.type,
           size: kycFile.size
-        }, 
-        {
-          headers: { Authorization: `Bearer ${token}` }
         }
       );
       

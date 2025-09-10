@@ -14,7 +14,7 @@ const SignIn = () => {
     }
   }, [currentUser, navigate]);
   const [loading, setLoading] = useState(false);
-  const REMEMBER_ME_SECRET_KEY = import.meta.env.VITE_REMEMBER_ME_SECRET_KEY || 'donner_secure_remember_me_key_2025';
+  const REMEMBER_ME_SECRET_KEY = import.meta.env.VITE_REMEMBER_ME_SECRET_KEY;
   const [formData, setFormData] = useState({
     email: '',
     password: '',

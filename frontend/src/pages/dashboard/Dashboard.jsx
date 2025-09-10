@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import api, { apiGet } from '../../utils/api';
+import useApi from '../../utils/useApi';
 import PieChart from '../../components/charts/PieChart';
 import LineChart from '../../components/charts/LineChart';
 import BarChart from '../../components/charts/BarChart';
@@ -340,65 +342,56 @@ const StaffDashboard = () => {
         setLoading(true);
         
         try {
-          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-          const token = localStorage.getItem('authToken');
+          const userId = currentUser.userId;
           
           // Fetch user data from userStore
-          const userDataResponse = await axios.get(`${API_URL}/profile?_=${Date.now()}`, {
+          const userDataResponse = await apiGet(`profile?_=${Date.now()}`, {
             headers: { 
-              Authorization: `Bearer ${token}`,
               'Cache-Control': 'no-cache, no-store, must-revalidate'
             }
           });
           
-          if (userDataResponse.data.status === 'success') {
-            setUserData(userDataResponse.data.data);
+          if (userDataResponse.status === 'success') {
+            setUserData(userDataResponse.data);
           }
           
           // Fetch donation history
-          const donationsResponse = await axios.get(`${API_URL}/donations`, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
+          const donationsResponse = await apiGet('donations');
           
-          if (donationsResponse.data.status === 'success') {
-            setDonationHistory(donationsResponse.data.data || []);
+          if (donationsResponse.status === 'success') {
+            setDonationHistory(donationsResponse.data || []);
           }
           
           // Fetch user requests using the working endpoint
-          const userId = currentUser.userId;
           console.log('Dashboard - Fetching requests for user:', userId);
           
           try {
             // Use the direct query parameter approach first (which we know works)
-            const requestsResponse = await axios.get(`${API_URL}/requests`, {
+            const requestsResponse = await apiGet('requests', {
               params: { userId: userId },
               headers: {
-                Authorization: `Bearer ${token}`,
                 'Cache-Control': 'no-cache, no-store, must-revalidate'
               }
             });
             
-            if (requestsResponse.data.status === 'success') {
-              console.log('Dashboard - Successfully fetched requests:', requestsResponse.data.data?.length || 0);
-              setUserRequests(requestsResponse.data.data || []);
+            if (requestsResponse.status === 'success') {
+              console.log('Dashboard - Successfully fetched requests:', requestsResponse.data?.length || 0);
+              setUserRequests(requestsResponse.data || []);
             }
           } catch (requestError) {
             console.error("Error fetching user requests:", requestError);
             
             // Fallback to the old endpoint if the first one fails
             try {
-              const fallbackResponse = await axios.get(`${API_URL}/requests/user/${userId}`, {
+              const fallbackResponse = await apiGet(`requests/user/${userId}`, {
                 headers: {
-                  Authorization: `Bearer ${token}`,
                   'Cache-Control': 'no-cache, no-store, must-revalidate'
                 }
               });
               
-              if (fallbackResponse.data.status === 'success') {
-                console.log('Dashboard - Fallback request succeeded:', fallbackResponse.data.data?.length || 0);
-                setUserRequests(fallbackResponse.data.data || []);
+              if (fallbackResponse.status === 'success') {
+                console.log('Dashboard - Fallback request succeeded:', fallbackResponse.data?.length || 0);
+                setUserRequests(fallbackResponse.data || []);
               }
             } catch (fallbackError) {
               console.error("Fallback request also failed:", fallbackError);

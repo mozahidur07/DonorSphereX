@@ -1,6 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import useUserStore from '../store/userStore';
+import api, { apiGet, apiPost, apiPut } from '../utils/api';
 
 // Create the context
 const AuthContext = createContext();
@@ -75,7 +76,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, selectedRole = 'donor') => {
     setError(null);
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+      // Use our centralized API client instead of axios directly
+      const response = await apiPost('auth/login', { email, password });
       
       console.log('Login response:', response.data);
       
@@ -150,9 +152,9 @@ export const AuthProvider = ({ children }) => {
       
       if (token) {
         if (allDevices) {
-          await axios.post(`${API_URL}/auth/logout-all`);
+          await apiPost('auth/logout-all');
         } else {
-          await axios.post(`${API_URL}/auth/logout`);
+          await apiPost('auth/logout');
         }
       }
     } catch (error) {
@@ -178,7 +180,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Sending registration data:', userData);
       
-      const response = await axios.post(`${API_URL}/auth/register`, userData);
+      const response = await apiPost('auth/register', userData);
       
       console.log('Register response:', response.data);
       
@@ -244,7 +246,7 @@ export const AuthProvider = ({ children }) => {
   const changePassword = async (currentPassword, newPassword, logoutAllDevices = false) => {
     setError(null);
     try {
-      const response = await axios.put(`${API_URL}/profile/change-password`, {
+      const response = await apiPut('profile/change-password', {
         currentPassword,
         newPassword,
         logoutAllDevices
