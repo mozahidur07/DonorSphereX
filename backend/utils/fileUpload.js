@@ -3,20 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const AppError = require('./appError');
 
-const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-const kycDir = path.join(uploadsDir, 'kyc');
-if (!fs.existsSync(kycDir)) {
-  fs.mkdirSync(kycDir, { recursive: true });
-}
-
-const profilePicsDir = path.join(uploadsDir, 'profile-pictures');
-if (!fs.existsSync(profilePicsDir)) {
-  fs.mkdirSync(profilePicsDir, { recursive: true });
-}
  
 const storage = multer.diskStorage({
   destination: function (req, file, cb) { 

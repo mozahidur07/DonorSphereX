@@ -307,10 +307,5 @@ userSchema.methods.resetJWTVersion = function() {
   return this.jwt_version;
 };
   
-userSchema.index({ userId: 1 }, { unique: true });
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ 'role.donor': 1 });
-userSchema.index({ 'role.staff': 1 });
-userSchema.index({ bloodType: 1 });
 
 module.exports = mongoose.model('User', userSchema, 'users');
