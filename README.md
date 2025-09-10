@@ -16,9 +16,15 @@ DonorSphereX is a comprehensive web platform designed to connect blood and organ
 
 [Visit DonorSphereX](https://donorspherex.vercel.app) 
 
+### Default Credentials for Testing
+
+- **Staff Account**
+  - ```Email: staff@donorspherex.com```
+  - ```Password: test@123```
+
 ## Demo Video
 
-[Watch the Demo Video]()  (Coming Soon)
+[Watch the Demo Video](https://youtu.be/wh_LFRPqe1g)
  
 ## Features
 
@@ -209,7 +215,7 @@ The API endpoints are organized by resource:
 - Notifications: `/api/notifications`
 - Staff Operations: `/api/staff`
 
-Detailed API documentation is available [here](https://documenter.getpostman.com/view/donorspherex) (Coming Soon).
+Detailed API documentation is available under backend and frontend folders.
 
 ## Credits
 
