@@ -94,6 +94,7 @@ app.use((req, res) => {
 
 
 connectDB()
+
   .then(() => {
     console.log('MongoDB connected successfully');
   })
@@ -101,3 +102,5 @@ connectDB()
     console.error('Failed to connect to MongoDB', err);
     process.exit(1);
   });
+
+module.exports = app;

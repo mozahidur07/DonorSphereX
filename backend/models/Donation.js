@@ -106,6 +106,6 @@ donationSchema.index({ donationType: 1 });
 donationSchema.index({ userId: 1 });
 donationSchema.index({ status: 1 });
 donationSchema.index({ date: 1 });
-donationSchema.index({ donationId: 1 }, { unique: true });
+// Removed duplicate index for donationId to avoid Mongoose warning
 
 module.exports = mongoose.model('Donation', donationSchema);
