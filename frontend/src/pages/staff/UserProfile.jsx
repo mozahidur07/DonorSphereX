@@ -488,6 +488,7 @@ const UserProfile = () => {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Id</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
@@ -498,6 +499,9 @@ const UserProfile = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {donations.map((donation) => (
                         <tr key={donation._id}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {donation.donationId}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {formatDate(donation.date || donation.createdAt)}
                           </td>
@@ -513,12 +517,10 @@ const UserProfile = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                               donation.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                              donation.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                              donation.status === 'rejected' || donation.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
                               'bg-yellow-100 text-yellow-800'
                             }`}>
-                              {donation.status === 'completed' ? 'Completed' : 
-                              donation.status === 'rejected' ? 'Rejected' : 
-                              'Pending'}
+                              {donation.status}
                             </span>
                           </td>
                         </tr>
@@ -546,6 +548,7 @@ const UserProfile = () => {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Id</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
@@ -556,6 +559,9 @@ const UserProfile = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {requests.map((request) => (
                         <tr key={request._id}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.requestId}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {formatDate(request.date || request.createdAt)}
                           </td>
@@ -577,12 +583,10 @@ const UserProfile = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                               request.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                              request.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                              request.status === 'rejected' || request.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
                               'bg-yellow-100 text-yellow-800'
                             }`}>
-                              {request.status === 'completed' ? 'Completed' : 
-                               request.status === 'rejected' ? 'Rejected' : 
-                               'Pending'}
+                              {request?.status}
                             </span>
                           </td>
                         </tr>

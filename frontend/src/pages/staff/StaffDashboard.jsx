@@ -10,7 +10,7 @@ const StaffDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Dashboard data states
+ 
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -21,20 +21,18 @@ const StaffDashboard = () => {
     kycPending: 0,
     kycCompleted: 0
   });
-  
-  // Recent data states
+   
   const [recentUsers, setRecentUsers] = useState([]);
   const [recentDonations, setRecentDonations] = useState([]);
   const [recentRequests, setRecentRequests] = useState([]);
-  
-  // KYC verification states
+   
   const [pendingKycUserIds, setPendingKycUserIds] = useState([]);
   const [pendingKycUsers, setPendingKycUsers] = useState([]);
   const [completedKycUsers, setCompletedKycUsers] = useState([]);
-  const [activeKycTab, setActiveKycTab] = useState('pending'); // 'pending' or 'completed'
+  const [activeKycTab, setActiveKycTab] = useState('pending');  
 
   useEffect(() => {
-    // Verify staff permissions
+ 
     if (!currentUser?.role?.staff || !currentUser?.staff_approval) {
       navigate('/dashboard');
       return;
@@ -76,29 +74,24 @@ const StaffDashboard = () => {
 
         setRecentDonations(data.recentDonations || []);
         setRecentRequests(data.recentRequests || []);
-        
-        // Store the list of user IDs with pending KYC verification
+         
         if (data.pendingKycUserIds && data.pendingKycUserIds.length > 0) { 
           setPendingKycUserIds(data.pendingKycUserIds);
         }
-        
-        // Store the detailed list of users with pending KYC verification
+         
         if (data.pendingKycUsers && data.pendingKycUsers.length > 0) { 
           setPendingKycUsers(data.pendingKycUsers);
         }
-        
-        // Store the list of users with completed KYC verification
+         
         if (data.completedKycUsers && data.completedKycUsers.length > 0) { 
           setCompletedKycUsers(data.completedKycUsers);
         }
-        
-        // No chart data processing needed
+         
       }
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
       setError("Failed to load dashboard data. Please try again.");
-      
-      // Don't use mock data, show the error to the user
+       
       return;
     } finally {
       setLoading(false);
@@ -138,7 +131,7 @@ const StaffDashboard = () => {
           <p className="text-gray-600">Monitor and manage donations, requests, and users</p>
         </div>
         
-        {/* Stats Cards */}
+         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           <StatsCard 
             title="Total Users" 

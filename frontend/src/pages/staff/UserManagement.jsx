@@ -10,6 +10,7 @@ const UserManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterBloodGroup, setFilterBloodGroup] = useState('all');
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   
@@ -74,8 +75,12 @@ const UserManagement = () => {
       filterStatus === 'all' ||
       (filterStatus === 'active' && user.status === 'active') ||
       (filterStatus === 'inactive' && user.status !== 'active');
+
+    const bloodGroupMatch = 
+      filterBloodGroup === 'all' ||
+      (user.bloodType && user.bloodType === filterBloodGroup);
     
-    return searchMatch && roleMatch && statusMatch;
+    return searchMatch && roleMatch && statusMatch && bloodGroupMatch;
   });
   
   // Get current users for pagination
@@ -119,7 +124,7 @@ const UserManagement = () => {
                   id="search"
                   name="search"
                   type="search"
-                  placeholder="Search by name, email, ID..."
+                  placeholder="Search by name, email, phone, ID..."
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -167,12 +172,36 @@ const UserManagement = () => {
                   <option value="inactive">Inactive</option>
                 </select>
               </div>
+              <div>
+                <label htmlFor="blood-group-filter" className="block text-sm font-medium text-gray-700 mb-1">Blood Group</label>
+                <select
+                  id="blood-group-filter"
+                  name="blood-group-filter"
+                  value={filterBloodGroup}
+                  onChange={(e) => {
+                    setFilterBloodGroup(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+                >
+                  <option value="all">All Blood Groups</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
               <div className="self-end">
                 <button
                   onClick={() => {
                     setSearchQuery('');
                     setFilterRole('all');
                     setFilterStatus('all');
+                    setFilterBloodGroup('all');
                     setCurrentPage(1);
                   }}
                   className="w-full px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"

@@ -12,7 +12,7 @@ import DataTable from '../../components/ui/DataTable';
 import StaffDashboardComponent from '../staff/StaffDashboard';
 import './Dashboard.css';
 
-// Mock data
+// Demo data
 const bloodDonationData = [
   { name: 'A+', value: 35.7 },
   { name: 'A-', value: 6.3 },
@@ -104,31 +104,7 @@ const donationColumns = [
   }
 ];
 
-const requestColumns = [
-  { header: 'Requester', accessor: 'requester' },
-  { header: 'Type', accessor: 'type' },
-  { 
-    header: 'Details', 
-    accessor: 'details',
-    render: (row) => row.type === 'Blood' ? `Blood Type: ${row.bloodType}` : `Organ: ${row.organ}`
-  },
-  { header: 'Date', accessor: 'date' },
-  { 
-    header: 'Urgency', 
-    accessor: 'urgency',
-    render: (row) => (
-      <span className={`px-2 py-1 text-xs rounded-full ${
-        row.urgency === 'Critical' 
-          ? 'bg-red-100 text-red-800' 
-          : row.urgency === 'High' 
-            ? 'bg-orange-100 text-orange-800' 
-            : 'bg-yellow-100 text-yellow-800'
-      }`}>
-        {row.urgency}
-      </span>
-    )
-  }
-];
+
 
 const userColumns = [
   { header: 'Name', accessor: 'name' },
@@ -151,7 +127,7 @@ const userColumns = [
 ];
 
 const Dashboard = () => {
-  // Initialize active role from localStorage or default to donor
+   
   const [activeRole, setActiveRole] = useState(() => {
     const savedRole = localStorage.getItem('dashboardRole');
     if (savedRole) {
@@ -167,8 +143,7 @@ const Dashboard = () => {
     staff: currentUser?.role?.staff && currentUser?.staff_approval,
     admin: currentUser?.role?.admin ?? false
   };
-  
-  // Save active role to localStorage whenever it changes
+   
   useEffect(() => {
     localStorage.setItem('dashboardRole', activeRole);
   }, [activeRole]);
@@ -316,12 +291,10 @@ const Dashboard = () => {
       </div>
     </>
   );
+ 
 
-  // Import the new StaffDashboard component
 
-
-const StaffDashboard = () => {
-  // Instead of rendering directly here, we'll use the dedicated component
+const StaffDashboard = () => { 
   return <StaffDashboardComponent />;
 };
 
@@ -457,14 +430,12 @@ const StaffDashboard = () => {
       });
     };
     
-    // Calculate badge status
     const getBadges = () => {
-      const badges = [];
-      
-      // First time donor badge
-      if (completedDonations > 0) {
-        badges.push({
-          name: "First Time",
+      const allBadges = [
+        {
+          name: "First Timer",
+          criteria: "Complete your first donation",
+          requiredDonations: 1,
           bgColor: "bg-red-100",
           textColor: "text-red-600",
           icon: (
@@ -472,13 +443,11 @@ const StaffDashboard = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
             </svg>
           )
-        });
-      }
-      
-      // Life Saver badge (3+ donations)
-      if (completedDonations >= 3) {
-        badges.push({
+        },
+        {
           name: "Life Saver",
+          criteria: "Complete 3 donations",
+          requiredDonations: 3,
           bgColor: "bg-blue-100",
           textColor: "text-blue-600",
           icon: (
@@ -486,13 +455,11 @@ const StaffDashboard = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           )
-        });
-      }
-      
-      // Regular Donor badge (5+ donations)
-      if (completedDonations >= 5) {
-        badges.push({
+        },
+        {
           name: "Regular Donor",
+          criteria: "Complete 5 donations",
+          requiredDonations: 5,
           bgColor: "bg-green-100",
           textColor: "text-green-600",
           icon: (
@@ -500,13 +467,11 @@ const StaffDashboard = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           )
-        });
-      }
-      
-      // Silver Badge (10+ donations)
-      if (completedDonations >= 10) {
-        badges.push({
+        },
+        {
           name: "Silver Donor",
+          criteria: "Complete 10 donations",
+          requiredDonations: 10,
           bgColor: "bg-gray-100",
           textColor: "text-gray-600",
           icon: (
@@ -514,13 +479,11 @@ const StaffDashboard = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
           )
-        });
-      }
-      
-      // Gold Badge (20+ donations)
-      if (completedDonations >= 20) {
-        badges.push({
+        },
+        {
           name: "Gold Donor",
+          criteria: "Complete 20 donations",
+          requiredDonations: 20,
           bgColor: "bg-yellow-100",
           textColor: "text-yellow-600",
           icon: (
@@ -528,10 +491,26 @@ const StaffDashboard = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
             </svg>
           )
-        });
-      }
-      
-      return badges;
+        },
+        {
+          name: "Platinum Donor",
+          criteria: "Complete 50 donations",
+          requiredDonations: 50,
+          bgColor: "bg-purple-100",
+          textColor: "text-purple-600",
+          icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+            </svg>
+          )
+        }
+      ];
+
+      return allBadges.map(badge => ({
+        ...badge,
+        earned: completedDonations >= badge.requiredDonations,
+        progress: Math.min(100, (completedDonations / badge.requiredDonations) * 100)
+      }));
     };
     
     const badges = getBadges();
@@ -640,6 +619,7 @@ const StaffDashboard = () => {
                   <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Id</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   </tr>
@@ -655,18 +635,19 @@ const StaffDashboard = () => {
                           {donation.location || donation.preferredHospital || 'Not specified'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {donation.donationId}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {donation.donationType || donation.type || 'Blood'} 
                           {donation.donationSubType || donation.subType ? ` (${donation.donationSubType || donation.subType})` : ''}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             donation.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                            donation.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                            donation.status === 'rejected' || donation.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
                             'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {donation.status === 'completed' ? 'Completed' : 
-                             donation.status === 'rejected' ? 'Rejected' : 
-                             'Pending'}
+                          } ${donation.status === 'processing' ? 'animate-pulse bg-slate-200 ' : ''}`}>
+                            {donation.status}
                           </span>
                         </td>
                       </tr>
@@ -691,7 +672,7 @@ const StaffDashboard = () => {
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-blue-800">Donation Eligibility</h3>
                   <div className="mt-2 text-sm text-blue-700">
-                    <p>Blood can be donated every 3 months. 
+                    <p>Blood can be donated with a gap of 8 weeks. 
                       {nextEligibilityDate ? (
                         <> Your next donation eligibility date: <span className="font-semibold">{formatDate(nextEligibilityDate)}</span></>
                       ) : (
@@ -730,6 +711,14 @@ const StaffDashboard = () => {
                       <p className="mt-2 text-sm text-green-700">
                         With {completedDonations} {completedDonations === 1 ? 'donation' : 'donations'}, you've potentially helped save up to {completedDonations * 3} lives. Each blood donation can save up to 3 lives!
                       </p>
+                      <div className="mt-3 flex items-center">
+                        <span className="text-sm text-green-600 font-medium mr-2">Achievement Progress:</span>
+                        <div className="flex items-center space-x-1">
+                          {badges.slice(0, 3).map((badge, index) => (
+                            <div key={index} className={`w-3 h-3 rounded-full ${badge.earned ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -739,47 +728,122 @@ const StaffDashboard = () => {
 
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h3 className="text-lg font-semibold mb-4">Achievement Badges</h3>
-            <div className="flex flex-wrap gap-6">
-              {badges.length > 0 ? (
-                badges.map((badge, index) => (
-                  <div key={index} className="flex flex-col items-center">
-                    <div className={`w-16 h-16 ${badge.bgColor} rounded-full flex items-center justify-center ${badge.textColor} mb-2`}>
-                      {badge.icon}
-                    </div>
-                    <span className="text-sm">{badge.name}</span>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {badges.map((badge, index) => (
+                <div key={index} className="flex flex-col items-center relative">
+                  <div className={`w-16 h-16 ${badge.earned ? badge.bgColor : 'bg-gray-200'} rounded-full flex items-center justify-center ${badge.earned ? badge.textColor : 'text-gray-400'} mb-2 relative overflow-hidden`}>
+                    {badge.icon}
+                    
+                    {/* Lock overlay for locked badges */}
+                    {!badge.earned && (
+                      <div className="absolute inset-0 bg-gray-800 bg-opacity-50 rounded-full flex items-center justify-center">
+                        {/* <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H8m13-9a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m0-6V9a4 4 0 118 0v2" />
+                        </svg> */}
+                      </div>
+                    )}
+                    
+                    {/* Progress ring for badges in progress */}
+                    {!badge.earned && badge.progress > 0 && (
+                      <div className="absolute inset-0">
+                        <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+                          <circle
+                            cx="32"
+                            cy="32"
+                            r="28"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            fill="transparent"
+                            className="text-gray-300"
+                          />
+                          <circle
+                            cx="32"
+                            cy="32"
+                            r="28"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            fill="transparent"
+                            strokeDasharray={`${badge.progress * 1.76} 176`}
+                            className="text-primary"
+                          />
+                        </svg>
+                      </div>
+                    )}
                   </div>
-                ))
-              ) : (
-                <div className="text-center w-full p-4 bg-gray-50 rounded-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
-                  <p className="text-gray-600">Complete your first donation to earn badges!</p>
-                  <Link to="/donation/blood" className="text-primary hover:underline inline-block mt-2">
-                    Donate Now
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {badges.length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-sm font-medium text-gray-500 mb-2">Next Badge</h4>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  {completedDonations < 3 ? (
-                    <p className="text-sm text-gray-600">Complete {3 - completedDonations} more donation(s) to earn the <span className="font-semibold text-blue-600">Life Saver</span> badge!</p>
-                  ) : completedDonations < 5 ? (
-                    <p className="text-sm text-gray-600">Complete {5 - completedDonations} more donation(s) to earn the <span className="font-semibold text-green-600">Regular Donor</span> badge!</p>
-                  ) : completedDonations < 10 ? (
-                    <p className="text-sm text-gray-600">Complete {10 - completedDonations} more donation(s) to earn the <span className="font-semibold text-gray-600">Silver Donor</span> badge!</p>
-                  ) : completedDonations < 20 ? (
-                    <p className="text-sm text-gray-600">Complete {20 - completedDonations} more donation(s) to earn the <span className="font-semibold text-yellow-600">Gold Donor</span> badge!</p>
-                  ) : (
-                    <p className="text-sm text-gray-600">Congratulations! You've earned all the badges. Your contribution is making a huge difference!</p>
+                  
+                  <span className={`text-xs text-center font-medium ${badge.earned ? 'text-gray-900' : 'text-gray-500'}`}>
+                    {badge.name}
+                  </span>
+                  
+                  <p className="text-xs text-gray-500 text-center mt-1 leading-tight">
+                    {badge.criteria}
+                  </p>
+                  
+                  {!badge.earned && (
+                    <div className="mt-1 text-xs text-center">
+                      <span className="text-primary font-medium">
+                        {completedDonations}/{badge.requiredDonations}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {badge.earned && (
+                    <div className="absolute -top-1 -right-1">
+                      <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    </div>
                   )}
                 </div>
+              ))}
+            </div>
+
+            {/* Progress Summary */}
+            <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-800 mb-3">Your Progress</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Badges Earned:</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {badges.filter(b => b.earned).length} / {badges.length}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Total Donations:</p>
+                  <p className="text-2xl font-bold text-blue-600">{completedDonations}</p>
+                </div>
               </div>
-            )}
+              
+              {/* Next Badge Progress */}
+              {(() => {
+                const nextBadge = badges.find(b => !b.earned);
+                if (nextBadge) {
+                  const remaining = nextBadge.requiredDonations - completedDonations;
+                  return (
+                    <div className="mt-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="text-sm font-medium text-gray-700">Next: {nextBadge.name}</p>
+                        <p className="text-sm text-gray-600">{remaining} more needed</p>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${nextBadge.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="mt-4 text-center">
+                    <p className="text-sm text-green-600 font-medium">🎉 Congratulations! You've earned all badges!</p>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         </div>
 
@@ -852,7 +916,7 @@ const StaffDashboard = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             request.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                            request.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                            request.status === 'rejected' || request.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
                             'bg-yellow-100 text-yellow-800'
                           }`}>
                             {request.status === 'completed' ? 'Completed' : 

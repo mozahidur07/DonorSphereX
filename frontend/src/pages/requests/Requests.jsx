@@ -11,7 +11,7 @@ const StatusIcon = ({ status }) => {
         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
       </svg>
     );
-  } else if (status === 'rejected') {
+  } else if (status === 'rejected' || status === 'cancelled') {
     return (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -413,7 +413,7 @@ const Requests = () => {
               <div className="absolute inset-0 bg-gray-500 opacity-75 backdrop-blur-sm"></div>
             </div>
             
-            <div className="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100">
+            <div className="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-100 max-h-[90vh]">
            
               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex justify-between items-center">
                 <h3 className="text-lg leading-6 font-semibold text-white flex items-center" id="modal-title">
@@ -434,7 +434,7 @@ const Requests = () => {
                 <div className="flex justify-center mb-4">
                   <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium ${
                     selectedRequest.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                    selectedRequest.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                    selectedRequest.status === 'rejected' || selectedRequest.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
                     'bg-yellow-100 text-yellow-800'
                   }`}>
                     <StatusIcon status={selectedRequest.status} />
@@ -442,95 +442,348 @@ const Requests = () => {
                   </span>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-500">Request ID</p>
-                    <p className="text-sm font-bold text-gray-900 bg-gray-50 px-3 py-1 rounded">{selectedRequest.requestId || selectedRequest.id || 'N/A'}</p>
-                  </div>
-                  
-                  <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-500">Type</p>
-                    <div className="flex items-center">
-                      <RequestTypeIcon type={selectedRequest.type} />
-                      <p className="ml-1 text-sm font-bold text-gray-900">{selectedRequest.type} - {selectedRequest.subType}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-500">Date & Time</p>
-                    <div className="flex items-center text-blue-600">
-                      <svg className="flex-shrink-0 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                      </svg>
-                      <p className="text-sm font-medium">
-                        {selectedRequest.createdAt ? format(new Date(selectedRequest.createdAt), 'MMM dd, yyyy') : (
-                          selectedRequest.date ? format(new Date(selectedRequest.date), 'MMM dd, yyyy') : 'N/A'
-                        )} {selectedRequest.createdAt && format(new Date(selectedRequest.createdAt), 'h:mm a')}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-500">Location</p>
-                    <div className="flex items-center">
-                      <svg className="flex-shrink-0 mr-1 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                      </svg>
-                      <p className="text-sm font-medium text-gray-900">{selectedRequest.location || selectedRequest.nearestHospital}</p>
-                    </div>
-                  </div>
-                  
-                  {selectedRequest.isForSelf === false && selectedRequest.patientName && (
+                <div className="max-h-96 overflow-y-auto space-y-4">
+                  {/* Basic Information Section */}
+                  <div className="space-y-4">
                     <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500">Patient Name</p>
+                      <p className="text-sm font-medium text-gray-500">Request ID</p>
+                      <p className="text-sm font-bold text-gray-900 bg-gray-50 px-3 py-1 rounded">{selectedRequest.requestId || selectedRequest.id || 'N/A'}</p>
+                    </div>
+                    
+                    <div className="flex justify-between items-center border-b border-gray-200 pb-3">
+                      <p className="text-sm font-medium text-gray-500">Type</p>
                       <div className="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        <p className="text-sm font-medium text-blue-600">{selectedRequest.patientName}</p>
+                        <RequestTypeIcon type={selectedRequest.type} />
+                        <p className="ml-1 text-sm font-bold text-gray-900">{selectedRequest.type}{selectedRequest.subType && ` - ${selectedRequest.subType}`}</p>
                       </div>
                     </div>
-                  )}
-                  
-                  {selectedRequest.rejectionReason && (
+                    
                     <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500">Rejection Reason</p>
-                      <p className="text-sm font-medium text-red-600 bg-red-50 px-3 py-1 rounded-lg">{selectedRequest.rejectionReason}</p>
-                    </div>
-                  )}
-                  
-                  {selectedRequest.urgency && (
-                    <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500">Urgency</p>
-                      <p className="text-sm font-medium text-orange-600 bg-orange-50 px-3 py-1 rounded-lg">{selectedRequest.urgency}</p>
-                    </div>
-                  )}
-                  
-                  {selectedRequest.recipientType && (
-                    <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500">Recipient Type</p>
-                      <p className="text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg">{selectedRequest.recipientType}</p>
-                    </div>
-                  )}
-                  
-                  {selectedRequest.scheduledDate && (
-                    <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500">Scheduled Date</p>
-                      <div className="flex items-center text-green-600">
+                      <p className="text-sm font-medium text-gray-500">Created Date</p>
+                      <div className="flex items-center text-blue-600">
                         <svg className="flex-shrink-0 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                          <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                         </svg>
                         <p className="text-sm font-medium">
-                          {format(new Date(selectedRequest.scheduledDate), 'MMM dd, yyyy')} at {format(new Date(selectedRequest.scheduledDate), 'h:mm a')}
+                          {selectedRequest.createdAt ? format(new Date(selectedRequest.createdAt), 'MMM dd, yyyy h:mm a') : (
+                            selectedRequest.date ? format(new Date(selectedRequest.date), 'MMM dd, yyyy') : 'N/A'
+                          )}
                         </p>
                       </div>
                     </div>
+
+                    {selectedRequest.updatedAt && (
+                      <div className="flex justify-between items-center border-b border-gray-200 pb-3">
+                        <p className="text-sm font-medium text-gray-500">Last Updated</p>
+                        <div className="flex items-center text-gray-600">
+                          <svg className="flex-shrink-0 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                          </svg>
+                          <p className="text-sm font-medium">
+                            {format(new Date(selectedRequest.updatedAt), 'MMM dd, yyyy h:mm a')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {selectedRequest.urgency && (
+                      <div className="flex justify-between items-center border-b border-gray-200 pb-3">
+                        <p className="text-sm font-medium text-gray-500">Urgency Level</p>
+                        <p className={`text-sm font-medium px-3 py-1 rounded-lg capitalize ${
+                          selectedRequest.urgency === 'critical' || selectedRequest.urgency === 'emergency' ? 'text-red-600 bg-red-50' :
+                          selectedRequest.urgency === 'high' || selectedRequest.urgency === 'urgent' ? 'text-orange-600 bg-orange-50' :
+                          selectedRequest.urgency === 'medium' || selectedRequest.urgency === 'elevated' ? 'text-yellow-600 bg-yellow-50' :
+                          'text-green-600 bg-green-50'
+                        }`}>
+                          {selectedRequest.urgency}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Patient Information Section */}
+                  <div className="bg-blue-50 p-4 rounded-lg space-y-3">
+                    <h4 className="text-sm font-semibold text-blue-800 border-b border-blue-200 pb-2">Patient Information</h4>
+                    
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm font-medium text-blue-700">Request For</p>
+                      <p className="text-sm font-medium text-blue-900">
+                        {selectedRequest.isForSelf ? 'Self' : 'Other Person'}
+                      </p>
+                    </div>
+
+                    {selectedRequest.isForSelf === false && selectedRequest.patientName && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-blue-700">Patient Name</p>
+                        <div className="flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          <p className="text-sm font-medium text-blue-900">{selectedRequest.patientName}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedRequest.recipientAge && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-blue-700">Patient Age</p>
+                        <p className="text-sm font-medium text-blue-900">{selectedRequest.recipientAge} years</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Medical Details Section */}
+                  {(selectedRequest.bloodType || selectedRequest.organ || selectedRequest.organType || selectedRequest.quantity || selectedRequest.medicalCondition) && (
+                    <div className="bg-green-50 p-4 rounded-lg space-y-3">
+                      <h4 className="text-sm font-semibold text-green-800 border-b border-green-200 pb-2">Medical Requirements</h4>
+                      
+                      {selectedRequest.bloodType && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-green-700">Blood Type</p>
+                          <p className="text-sm font-bold text-red-600 bg-red-50 px-3 py-1 rounded-lg">{selectedRequest.bloodType}</p>
+                        </div>
+                      )}
+
+                      {(selectedRequest.organ || selectedRequest.organType) && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-green-700">Organ Required</p>
+                          <p className="text-sm font-medium text-green-900 bg-green-100 px-3 py-1 rounded-lg">
+                            {selectedRequest.organ || selectedRequest.organType}
+                          </p>
+                        </div>
+                      )}
+
+                      {selectedRequest.quantity && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-green-700">Quantity Required</p>
+                          <p className="text-sm font-medium text-green-900">{selectedRequest.quantity} units</p>
+                        </div>
+                      )}
+
+                      {selectedRequest.medicalCondition && (
+                        <div>
+                          <p className="text-sm font-medium text-green-700 mb-2">Medical Condition</p>
+                          <div className="bg-green-100 rounded-lg p-3 text-sm text-green-800">
+                            <p>{selectedRequest.medicalCondition}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )}
-                  
+
+                  {/* Hospital & Doctor Information */}
+                  {(selectedRequest.hospital || selectedRequest.nearestHospital || selectedRequest.doctorName || selectedRequest.doctorContact) && (
+                    <div className="bg-purple-50 p-4 rounded-lg space-y-3">
+                      <h4 className="text-sm font-semibold text-purple-800 border-b border-purple-200 pb-2">Hospital & Doctor Information</h4>
+                      
+                      {(selectedRequest.hospital?.name || selectedRequest.nearestHospital) && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-purple-700">Hospital</p>
+                          <div className="flex items-center">
+                            <svg className="flex-shrink-0 mr-1 h-4 w-4 text-purple-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                            </svg>
+                            <p className="text-sm font-medium text-purple-900">{selectedRequest.hospital?.name || selectedRequest.nearestHospital}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedRequest.hospital?.address && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-purple-700">Hospital Address</p>
+                          <p className="text-sm font-medium text-purple-900 max-w-xs text-right">{selectedRequest.hospital.address}</p>
+                        </div>
+                      )}
+
+                      {selectedRequest.hospital?.phone && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-purple-700">Hospital Phone</p>
+                          <div className="flex items-center">
+                            <svg className="flex-shrink-0 mr-1 h-4 w-4 text-purple-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                            </svg>
+                            <p className="text-sm font-medium text-purple-900">{selectedRequest.hospital.phone}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedRequest.doctorName && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-purple-700">Doctor Name</p>
+                          <p className="text-sm font-medium text-purple-900">{selectedRequest.doctorName}</p>
+                        </div>
+                      )}
+
+                      {selectedRequest.doctorContact && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-purple-700">Doctor Contact</p>
+                          <p className="text-sm font-medium text-purple-900">{selectedRequest.doctorContact}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Timeline & Dates */}
+                  <div className="bg-yellow-50 p-4 rounded-lg space-y-3">
+                    <h4 className="text-sm font-semibold text-yellow-800 border-b border-yellow-200 pb-2">Important Dates</h4>
+                    
+                    {selectedRequest.requiredBy && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-yellow-700">Required By</p>
+                        <div className="flex items-center text-red-600">
+                          <svg className="flex-shrink-0 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                          </svg>
+                          <p className="text-sm font-medium">
+                            {format(new Date(selectedRequest.requiredBy), 'MMM dd, yyyy h:mm a')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedRequest.scheduledDate && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-yellow-700">Scheduled Date</p>
+                        <div className="flex items-center text-green-600">
+                          <svg className="flex-shrink-0 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                          </svg>
+                          <p className="text-sm font-medium">
+                            {format(new Date(selectedRequest.scheduledDate), 'MMM dd, yyyy h:mm a')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedRequest.campaignDate && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-yellow-700">Campaign Date</p>
+                        <div className="flex items-center text-purple-600">
+                          <svg className="flex-shrink-0 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                          </svg>
+                          <p className="text-sm font-medium">
+                            {format(new Date(selectedRequest.campaignDate), 'MMM dd, yyyy')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Campaign Information */}
+                  {(selectedRequest.campaignRequired || selectedRequest.campaignDescription) && (
+                    <div className="bg-indigo-50 p-4 rounded-lg space-y-3">
+                      <h4 className="text-sm font-semibold text-indigo-800 border-b border-indigo-200 pb-2">Campaign Information</h4>
+                      
+                      {selectedRequest.campaignRequired && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-indigo-700">Campaign Required</p>
+                          <p className="text-sm font-medium text-indigo-900 bg-indigo-100 px-3 py-1 rounded-lg">Yes</p>
+                        </div>
+                      )}
+
+                      {selectedRequest.campaignDescription && (
+                        <div>
+                          <p className="text-sm font-medium text-indigo-700 mb-2">Campaign Description</p>
+                          <div className="bg-indigo-100 rounded-lg p-3 text-sm text-indigo-800">
+                            <p>{selectedRequest.campaignDescription}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Medical Documentation */}
+                  {(selectedRequest.medicalCertificate || selectedRequest.medicalNotes || selectedRequest.medicalDetails) && (
+                    <div className="bg-teal-50 p-4 rounded-lg space-y-3">
+                      <h4 className="text-sm font-semibold text-teal-800 border-b border-teal-200 pb-2">Medical Documentation</h4>
+                      
+                      {selectedRequest.medicalCertificate && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-teal-700">Medical Certificate</p>
+                          <p className="text-sm font-medium text-teal-900 bg-teal-100 px-3 py-1 rounded-lg">Available</p>
+                        </div>
+                      )}
+
+                      {selectedRequest.medicalNotes && (
+                        <div>
+                          <p className="text-sm font-medium text-teal-700 mb-2">Medical Notes</p>
+                          <div className="bg-teal-100 rounded-lg p-3 text-sm text-teal-800">
+                            <p>{selectedRequest.medicalNotes}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedRequest.medicalDetails && (
+                        <div>
+                          <p className="text-sm font-medium text-teal-700 mb-2">Medical Details</p>
+                          <div className="bg-teal-100 rounded-lg p-3 text-sm text-teal-800">
+                            <p>{selectedRequest.medicalDetails}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Status Information */}
+                  <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-800 border-b border-gray-200 pb-2">Status Information</h4>
+                    
+                    {selectedRequest.rejectionReason && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 mb-2">Rejection Reason</p>
+                        <div className="bg-red-50 rounded-lg p-3 text-sm text-red-800 border border-red-200">
+                          <p>{selectedRequest.rejectionReason}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedRequest.statusNotes && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 mb-2">Status Notes</p>
+                        <div className="bg-gray-100 rounded-lg p-3 text-sm text-gray-800">
+                          <p>{selectedRequest.statusNotes}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedRequest.recipientType && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-gray-700">Recipient Type</p>
+                        <p className="text-sm font-medium text-gray-900 bg-gray-100 px-3 py-1 rounded-lg">{selectedRequest.recipientType}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Fulfillment Information */}
+                  {selectedRequest.fulfilledBy && selectedRequest.fulfilledBy.length > 0 && (
+                    <div className="bg-green-50 p-4 rounded-lg space-y-3">
+                      <h4 className="text-sm font-semibold text-green-800 border-b border-green-200 pb-2">Fulfillment Details</h4>
+                      
+                      {selectedRequest.fulfilledBy.map((fulfillment, index) => (
+                        <div key={index} className="bg-green-100 rounded-lg p-3 space-y-2">
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm font-medium text-green-700">Donor #{index + 1}</p>
+                            <p className="text-sm font-medium text-green-900">
+                              {fulfillment.date && format(new Date(fulfillment.date), 'MMM dd, yyyy')}
+                            </p>
+                          </div>
+                          {fulfillment.quantity && (
+                            <div className="flex justify-between items-center">
+                              <p className="text-sm text-green-700">Quantity</p>
+                              <p className="text-sm font-medium text-green-900">{fulfillment.quantity} units</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Additional Notes */}
                   {selectedRequest.notes && (
-                    <div className="border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500 mb-2">Notes</p>
-                      <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-800">
+                    <div className="bg-amber-50 p-4 rounded-lg">
+                      <h4 className="text-sm font-semibold text-amber-800 border-b border-amber-200 pb-2 mb-3">Additional Notes</h4>
+                      <div className="bg-amber-100 rounded-lg p-3 text-sm text-amber-800">
                         <p>{selectedRequest.notes}</p>
                       </div>
                     </div>

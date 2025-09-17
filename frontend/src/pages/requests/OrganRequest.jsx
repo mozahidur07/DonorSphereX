@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import { hospitals, searchHospitals } from '../../data/hospitals';
 
 const organTypes = [
   'Kidney',
@@ -16,16 +17,6 @@ const organTypes = [
   'Other'
 ];
 
-const hospitals = [
-  'City General Hospital',
-  'Memorial Hospital',
-  'University Medical Center',
-  'National Organ Transplant Center',
-  'Regional Transplant Institute',
-  'Children\'s Hospital',
-  'Veterans Hospital',
-];
-
 const OrganRequest = () => {
   const { currentUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +28,7 @@ const OrganRequest = () => {
     bloodType: '',
     urgency: 'Standard',
     isForSelf: true,
+    recipientType: 'Self',
     patientName: '',
     recipientAge: '',
     location: '',
@@ -50,6 +42,10 @@ const OrganRequest = () => {
     createdAt: new Date(),
   });
 
+  const [hospitalSearch, setHospitalSearch] = useState('');
+  const [showHospitalDropdown, setShowHospitalDropdown] = useState(false);
+  const [filteredHospitals, setFilteredHospitals] = useState([]);
+
   // Set a new request ID when component mounts
   useEffect(() => {
     setFormData(prev => ({
@@ -58,6 +54,34 @@ const OrganRequest = () => {
     }));
   }, []);
 
+  // Hospital search functionality
+  useEffect(() => {
+    if (hospitalSearch) {
+      const filtered = searchHospitals(hospitalSearch);
+      setFilteredHospitals(filtered);
+    } else {
+      setFilteredHospitals(hospitals);
+    }
+  }, [hospitalSearch]);
+
+  // Click outside handler for hospital dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.hospital-dropdown-container')) {
+        setShowHospitalDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleHospitalSelect = (hospital) => {
+    setFormData(prev => ({ ...prev, nearestHospital: hospital }));
+    setHospitalSearch(hospital);
+    setShowHospitalDropdown(false);
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
@@ -65,7 +89,7 @@ const OrganRequest = () => {
     if (name === 'recipientType') {
       setFormData({
         ...formData,
-        [name]: value,
+        recipientType: value,
         isForSelf: value === 'Self',
         // Clear patientName if self is selected
         ...(value === 'Self' && { patientName: '' })
@@ -285,7 +309,7 @@ const OrganRequest = () => {
                 <select
                   id="recipientType"
                   name="recipientType"
-                  value={formData.isForSelf ? 'Self' : 'Other'}
+                  value={formData.recipientType}
                   onChange={handleChange}
                   required
                   className="block w-full rounded-md py-1 px-2 bg-[#c3c3c354] border-[1px] border-[#c3c3c3b0] shadow-sm focus:border-none"
@@ -353,26 +377,51 @@ const OrganRequest = () => {
                 />
               </div>
 
-              <div>
+              <div className="hospital-dropdown-container relative">
                 <label htmlFor="nearestHospital" className="block text-sm font-medium text-gray-700 mb-1">
                   Preferred Transplant Center*
                 </label>
-                <select
-                  id="nearestHospital"
-                  name="nearestHospital"
-                  value={formData.nearestHospital}
-                  onChange={handleChange}
-                  required
-                  className="block w-full rounded-md py-1 px-2 bg-[#c3c3c354] border-[1px] border-[#c3c3c3b0] shadow-sm focus:border-none"
-                >
-                  <option value="">Select Hospital/Transplant Center</option>
-                  {hospitals.map((hospital) => (
-                    <option key={hospital} value={hospital}>
-                      {hospital}
-                    </option>
-                  ))}
-                  <option value="other">Other (Specify in medical details)</option>
-                </select>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="nearestHospital"
+                    name="nearestHospital"
+                    value={hospitalSearch}
+                    onChange={(e) => {
+                      setHospitalSearch(e.target.value);
+                      setShowHospitalDropdown(true);
+                    }}
+                    onFocus={() => setShowHospitalDropdown(true)}
+                    required
+                    placeholder="Search for transplant center..."
+                    className="block w-full rounded-md py-1 px-2 bg-[#c3c3c354] border-[1px] border-[#c3c3c3b0] shadow-sm focus:border-none pr-8"
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  
+                  {showHospitalDropdown && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                      {filteredHospitals.length > 0 ? (
+                        filteredHospitals.map((hospital, index) => (
+                          <div
+                            key={index}
+                            onClick={() => handleHospitalSelect(hospital)}
+                            className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0"
+                          >
+                            {hospital}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-4 py-2 text-sm text-gray-500">
+                          No transplant centers found
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

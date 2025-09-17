@@ -21,6 +21,7 @@ const DonationManagement = () => {
   // For donation updates
   const [selectedDonation, setSelectedDonation] = useState(null);
   const [updateModal, setUpdateModal] = useState(false);
+  const [detailsModal, setDetailsModal] = useState(false);
   const [updateStatus, setUpdateStatus] = useState('');
   const [updateReason, setUpdateReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -98,16 +99,13 @@ const DonationManagement = () => {
         payload.statusNotes = updateReason;
       }
       
-      
       const response = await axios.put(`${API_URL}/donations/${selectedDonation.donationId}/status`, payload, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       
-      
       if (response.data.status === 'success') {
-        // Refresh data
         fetchDonations();
         closeModal();
       } else {
@@ -128,12 +126,18 @@ const DonationManagement = () => {
     setUpdateReason('');
     setUpdateModal(true);
   };
+
+  const openDetailsModal = (donation) => {
+    setSelectedDonation(donation);
+    setDetailsModal(true);
+  };
   
   const closeModal = () => {
     setSelectedDonation(null);
     setUpdateStatus('');
     setUpdateReason('');
     setUpdateModal(false);
+    setDetailsModal(false);
   };
   
   const formatDate = (date) => {
@@ -143,6 +147,28 @@ const DonationManagement = () => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const formatDateTime = (date) => {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
+      case 'approved': return 'bg-blue-100 text-blue-800';
+      case 'processing': return 'bg-purple-100 text-purple-800';
+      case 'cancelled': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-yellow-100 text-yellow-800';
+    }
   };
   
   const handleFilterChange = (e) => {
@@ -359,8 +385,8 @@ const DonationManagement = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Donor</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Donation ID</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Donor Information</th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
@@ -371,18 +397,25 @@ const DonationManagement = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {donations.map((donation) => (
-                      <tr key={donation._id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          {donation.donationId}
+                      <tr key={donation._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{donation.donationId}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{donation.userName}</div>
-                          <div className="text-sm text-gray-500">{donation.userEmail}</div>
+                          <div className="flex items-center">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{donation.userName || 'N/A'}</div>
+                              <div className="text-sm text-gray-500">{donation.userEmail || 'N/A'}</div>
+                              <div className="text-sm text-gray-500">ID: {donation.userId || 'N/A'}</div>
+                            </div>
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {donation.donationType}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                            {donation.donationType || 'N/A'}
+                          </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {donation.donationType === 'Blood' ? donation.bloodType :
                            donation.donationType === 'Organ' ? donation.organType : 
                            donation.donationSubType || 'N/A'}
@@ -391,33 +424,36 @@ const DonationManagement = () => {
                           {formatDate(donation.date || donation.createdAt)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {donation.location || donation.preferredHospital || 'Not specified'}
+                          <div className="max-w-xs truncate">
+                            {donation.location || donation.preferredHospital || 'Not specified'}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            donation.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                            donation.status === 'rejected' ? 'bg-red-100 text-red-800' : 
-                            donation.status === 'approved' ? 'bg-blue-100 text-blue-800' : 
-                            donation.status === 'processing' ? 'bg-purple-100 text-purple-800' : 
-                            donation.status === 'cancelled' ? 'bg-gray-100 text-gray-800' : 
-                            'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {donation.status.charAt(0).toUpperCase() + donation.status.slice(1)}
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(donation.status)}`}>
+                            {donation.status ? donation.status.charAt(0).toUpperCase() + donation.status.slice(1) : 'Unknown'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <button
-                            onClick={() => openUpdateModal(donation)}
-                            className="text-blue-600 hover:text-blue-800 hover:underline"
-                          >
-                            Update Status
-                          </button>
-                          <Link
-                            to={`/staff/users/${donation.userId}`}
-                            className="ml-3 text-blue-600 hover:text-blue-800 hover:underline"
-                          >
-                            View Donor
-                          </Link>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => openDetailsModal(donation)}
+                              className="text-blue-600 hover:text-blue-800 hover:underline"
+                            >
+                              View Details
+                            </button>
+                            <button
+                              onClick={() => openUpdateModal(donation)}
+                              className="text-green-600 hover:text-green-800 hover:underline"
+                            >
+                              Update Status
+                            </button>
+                            <Link
+                              to={`/staff/users/${donation.userId}`}
+                              className="text-purple-600 hover:text-purple-800 hover:underline"
+                            >
+                              View User
+                            </Link>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -425,14 +461,13 @@ const DonationManagement = () => {
                 </table>
               </div>
               
-              {/* Pagination */}
               <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                 <div className="flex-1 flex justify-between sm:hidden">
                   <button
                     onClick={() => setPage(prev => Math.max(prev - 1, 1))}
                     disabled={page === 1}
                     className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
-                      page === 1 ? 'text-gray-400 bg-gray-100' : 'text-gray-700 bg-white hover:bg-gray-50'
+                      page === 1 ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-gray-700 bg-white hover:bg-gray-50'
                     }`}
                   >
                     Previous
@@ -441,7 +476,7 @@ const DonationManagement = () => {
                     onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={page === totalPages}
                     className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
-                      page === totalPages ? 'text-gray-400 bg-gray-100' : 'text-gray-700 bg-white hover:bg-gray-50'
+                      page === totalPages ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-gray-700 bg-white hover:bg-gray-50'
                     }`}
                   >
                     Next
@@ -450,7 +485,8 @@ const DonationManagement = () => {
                 <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm text-gray-700">
-                      Showing <span className="font-medium">{donations.length ? (page - 1) * limit + 1 : 0}</span> to <span className="font-medium">{Math.min(page * limit, (page - 1) * limit + donations.length)}</span> of{' '}
+                      Showing <span className="font-medium">{donations.length ? (page - 1) * limit + 1 : 0}</span> to{' '}
+                      <span className="font-medium">{Math.min(page * limit, (page - 1) * limit + donations.length)}</span> of{' '}
                       <span className="font-medium">{totalPages * limit}</span> results
                     </p>
                   </div>
@@ -460,7 +496,7 @@ const DonationManagement = () => {
                         onClick={() => setPage(prev => Math.max(prev - 1, 1))}
                         disabled={page === 1}
                         className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
-                          page === 1 ? 'text-gray-400' : 'text-gray-500 hover:bg-gray-50'
+                          page === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
                         }`}
                       >
                         <span className="sr-only">Previous</span>
@@ -469,8 +505,7 @@ const DonationManagement = () => {
                         </svg>
                       </button>
                       
-                      {/* Page numbers */}
-                      {[...Array(totalPages).keys()].map(num => {
+                      {[...Array(Math.min(totalPages, 5)).keys()].map(num => {
                         const pageNum = num + 1;
                         return (
                           <button
@@ -491,7 +526,7 @@ const DonationManagement = () => {
                         onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
                         disabled={page === totalPages}
                         className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
-                          page === totalPages ? 'text-gray-400' : 'text-gray-500 hover:bg-gray-50'
+                          page === totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
                         }`}
                       >
                         <span className="sr-only">Next</span>
@@ -508,6 +543,287 @@ const DonationManagement = () => {
         </div>
       </div>
       
+      {/* Details Modal */}
+      {detailsModal && selectedDonation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white scale-[0.90] rounded-lg max-w-4xl w-full max-h-screen overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h3 className="text-lg font-medium text-gray-900">
+                Donation Details - {selectedDonation.donationId}
+              </h3>
+              <button
+                onClick={closeModal}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[80vh]">
+              {/* User Details Section */}
+              <div className="mb-8">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">User Details</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.userName || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">User ID</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.userId || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.userEmail || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Phone</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.contactNumber || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Age</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.age || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Blood Type</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.bloodType || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Weight</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.weight ? `${selectedDonation.weight} kg` : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Height</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.height ? `${selectedDonation.height} cm` : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Donation Information */}
+              <div className="mb-8">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Donation Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Donation ID</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.donationId}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Type</label>
+                    <p className="text-sm bg-gray-50 p-2 rounded">
+                      <span className="px-2 py-1 text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                        {selectedDonation.donationType}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Sub Type</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.donationType === 'Blood' ? selectedDonation.bloodType :
+                       selectedDonation.donationType === 'Organ' ? selectedDonation.organType : 
+                       selectedDonation.donationSubType || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Date</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {formatDateTime(selectedDonation.date || selectedDonation.createdAt)}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Location</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.location || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Preferred Hospital</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedDonation.preferredHospital || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Status</label>
+                    <p className="text-sm bg-gray-50 p-2 rounded">
+                      <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${getStatusColor(selectedDonation.status)}`}>
+                        {selectedDonation.status ? selectedDonation.status.charAt(0).toUpperCase() + selectedDonation.status.slice(1) : 'Unknown'}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">For Self</label>
+                    <p className="text-sm bg-gray-50 p-2 rounded">
+                      <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                        selectedDonation.isForSelf ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {selectedDonation.isForSelf ? 'YES' : 'NO'}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Medical Information */}
+              <div className="mb-8">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Medical Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Chronic Illness</label>
+                    <p className="text-sm bg-gray-50 p-2 rounded">
+                      <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                        selectedDonation.hasChronicIllness ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                      }`}>
+                        {selectedDonation.hasChronicIllness ? 'YES' : 'NO'}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Medical Condition</label>
+                    <p className="text-sm bg-gray-50 p-2 rounded">
+                      <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                        selectedDonation.hasMedicalCondition ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                      }`}>
+                        {selectedDonation.hasMedicalCondition ? 'YES' : 'NO'}
+                      </span>
+                    </p>
+                  </div>
+                  {selectedDonation.chronicIllnessDetails && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">Chronic Illness Details</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedDonation.chronicIllnessDetails}
+                      </p>
+                    </div>
+                  )}
+                  {selectedDonation.medicalConditionDetails && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">Medical Condition Details</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedDonation.medicalConditionDetails}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Emergency Contact */}
+              {(selectedDonation.emergencyContact || selectedDonation.relationship) && (
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Emergency Contact</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Emergency Contact</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedDonation.emergencyContact || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Relationship</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedDonation.relationship || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Patient Information (if not for self) */}
+              {!selectedDonation.isForSelf && selectedDonation.patientName && (
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Patient Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Patient Name</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedDonation.patientName}
+                      </p>
+                    </div>
+                    {selectedDonation.organType && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Organ Type</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedDonation.organType}
+                        </p>
+                      </div>
+                    )}
+                    {selectedDonation.quantity && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedDonation.quantity}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Additional Notes */}
+              {(selectedDonation.additionalNotes || selectedDonation.statusNotes) && (
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Additional Notes</h4>
+                  <div className="space-y-4">
+                    {selectedDonation.additionalNotes && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Donation Notes</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded">
+                          {selectedDonation.additionalNotes}
+                        </p>
+                      </div>
+                    )}
+                    {selectedDonation.statusNotes && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Status Notes</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded">
+                          {selectedDonation.statusNotes}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3 border-t pt-4">
+                <button
+                  onClick={closeModal}
+                  className="px-4 py-2 text-gray-700 hover:text-gray-900"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setDetailsModal(false);
+                    openUpdateModal(selectedDonation);
+                  }}
+                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition"
+                >
+                  Update Status
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Status update modal */}
       {updateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -522,9 +838,21 @@ const DonationManagement = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Donation ID</label>
                   <p className="text-sm text-gray-600">{selectedDonation?.donationId}</p>
                 </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Donor</label>
+                  <p className="text-sm text-gray-600">{selectedDonation?.userName} ({selectedDonation?.userEmail})</p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Current Status</label>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedDonation?.status)}`}>
+                    {selectedDonation?.status ? selectedDonation.status.charAt(0).toUpperCase() + selectedDonation.status.slice(1) : 'Unknown'}
+                  </span>
+                </div>
                 
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">New Status</label>
                   <select
                     value={updateStatus}
                     onChange={(e) => setUpdateStatus(e.target.value)}
@@ -540,6 +868,15 @@ const DonationManagement = () => {
                     <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
+
+                {updateStatus === 'completed' && (
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                    <h4 className="text-sm font-medium text-blue-900 mb-2">Completion Notice</h4>
+                    <p className="text-sm text-blue-700">
+                      Completing this donation will update the user's last donation date and calculate their next eligible donation date based on donation type guidelines.
+                    </p>
+                  </div>
+                )}
                 
                 {updateStatus === 'rejected' && (
                   <div className="mb-4">
@@ -549,6 +886,7 @@ const DonationManagement = () => {
                       onChange={(e) => setUpdateReason(e.target.value)}
                       className="w-full p-2 border border-gray-300 rounded focus:ring-primary focus:border-primary"
                       rows="3"
+                      placeholder="Please provide a reason for rejection..."
                       required
                     ></textarea>
                   </div>

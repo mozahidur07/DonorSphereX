@@ -2,22 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import { hospitals, searchHospitals } from '../../data/hospitals';
 
 const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-const hospitals = [
-  'City General Hospital',
-  'Memorial Hospital',
-  'Red Cross Center',
-  'University Hospital',
-  'Community Health Center',
-  'Children\'s Hospital',
-  'Veterans Hospital',
-];
 
 const BloodRequest = () => {
   const { currentUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [submitMessage, setSubmitMessage] = useState({ type: '', message: '' });
+  const [hospitalSearch, setHospitalSearch] = useState('');
+  const [filteredHospitals, setFilteredHospitals] = useState(hospitals);
+  const [showHospitalDropdown, setShowHospitalDropdown] = useState(false);
   
   const [formData, setFormData] = useState({
     requestId: `RBLD-${uuidv4().slice(0, 8).toUpperCase()}`,
@@ -25,6 +20,7 @@ const BloodRequest = () => {
     quantity: '',
     urgency: 'Normal',
     isForSelf: true,
+    recipientType: 'Self',
     patientName: '',
     location: '',
     nearestHospital: '',
@@ -45,6 +41,45 @@ const BloodRequest = () => {
     }));
   }, []);
 
+  // Handle hospital search
+  useEffect(() => {
+    const filtered = searchHospitals(hospitalSearch);
+    setFilteredHospitals(filtered);
+  }, [hospitalSearch]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('#nearestHospital') && !event.target.closest('.hospital-dropdown')) {
+        setShowHospitalDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleHospitalSearch = (e) => {
+    const value = e.target.value;
+    setHospitalSearch(value);
+    setShowHospitalDropdown(true);
+    setFormData({
+      ...formData,
+      nearestHospital: value
+    });
+  };
+
+  const selectHospital = (hospital) => {
+    setFormData({
+      ...formData,
+      nearestHospital: hospital
+    });
+    setHospitalSearch(hospital);
+    setShowHospitalDropdown(false);
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
@@ -52,7 +87,7 @@ const BloodRequest = () => {
     if (name === 'recipientType') {
       setFormData({
         ...formData,
-        [name]: value,
+        recipientType: value,
         isForSelf: value === 'Self',
         // Clear patientName if self is selected
         ...(value === 'Self' && { patientName: '' })
@@ -121,6 +156,7 @@ const BloodRequest = () => {
           quantity: '',
           urgency: 'Normal',
           isForSelf: true,
+          recipientType: 'Self',
           patientName: '',
           location: '',
           nearestHospital: '',
@@ -263,7 +299,7 @@ const BloodRequest = () => {
                 <select
                   id="recipientType"
                   name="recipientType"
-                  value={formData.isForSelf ? 'Self' : 'Other'}
+                  value={formData.recipientType}
                   onChange={handleChange}
                   required
                   className="block w-full rounded-md py-1 px-2 bg-[#c3c3c354] border-[1px] border-[#c3c3c3b0] shadow-sm focus:border-none"
@@ -296,10 +332,47 @@ const BloodRequest = () => {
             )}
 
             {/* Location */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <div>
+                <label htmlFor="nearestHospital" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nearest Hospital/Blood Bank*
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="nearestHospital"
+                    name="nearestHospital"
+                    value={hospitalSearch}
+                    onChange={handleHospitalSearch}
+                    onFocus={() => setShowHospitalDropdown(true)}
+                    required
+                    placeholder="Search for a hospital or blood bank..."
+                    className="block w-full rounded-md py-2 px-3 bg-[#c3c3c354] border-[1px] border-[#c3c3c3b0] shadow-sm focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    autoComplete="off"
+                  />
+                  
+                  {showHospitalDropdown && filteredHospitals.length > 0 && (
+                    <div className="hospital-dropdown absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                      {filteredHospitals.map((hospital) => (
+                        <div
+                          key={hospital}
+                          className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-red-50 hover:text-red-900"
+                          onClick={() => selectHospital(hospital)}
+                        >
+                          <span className="block truncate">{hospital}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Start typing to search from {hospitals.length} available hospitals across India
+                </p>
+              </div>
+
               <div>
                 <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                  Your Location*
+                  Your Address/Area*
                 </label>
                 <input
                   type="text"
@@ -308,31 +381,9 @@ const BloodRequest = () => {
                   value={formData.location}
                   onChange={handleChange}
                   required
-                  placeholder="Enter your city/area"
-                  className="block w-full rounded-md py-1 px-2 bg-[#c3c3c354] border-[1px] border-[#c3c3c3b0] shadow-sm focus:border-none"
+                  placeholder="Enter your detailed address or area"
+                  className="block w-full rounded-md py-2 px-3 bg-[#c3c3c354] border-[1px] border-[#c3c3c3b0] shadow-sm focus:border-red-500 focus:ring-1 focus:ring-red-500"
                 />
-              </div>
-
-              <div>
-                <label htmlFor="nearestHospital" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nearest Hospital/Blood Bank*
-                </label>
-                <select
-                  id="nearestHospital"
-                  name="nearestHospital"
-                  value={formData.nearestHospital}
-                  onChange={handleChange}
-                  required
-                  className="block w-full rounded-md py-1 px-2 bg-[#c3c3c354] border-[1px] border-[#c3c3c3b0] shadow-sm focus:border-none"
-                >
-                  <option value="">Select Hospital/Blood Bank</option>
-                  {hospitals.map((hospital) => (
-                    <option key={hospital} value={hospital}>
-                      {hospital}
-                    </option>
-                  ))}
-                  <option value="other">Other (Specify in medical details)</option>
-                </select>
               </div>
             </div>
 

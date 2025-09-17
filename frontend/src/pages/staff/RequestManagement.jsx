@@ -25,6 +25,10 @@ const RequestManagement = () => {
   const [updateReason, setUpdateReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // For request details modal
+  const [detailsModal, setDetailsModal] = useState(false);
+  const [selectedRequestDetails, setSelectedRequestDetails] = useState(null);
+
   useEffect(() => {
     // Verify staff permissions
     if (!currentUser?.role?.staff || !currentUser?.staff_approval) {
@@ -43,7 +47,7 @@ const RequestManagement = () => {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
       const token = localStorage.getItem('authToken');
       
-      // Build query parameters for axios
+      
       let params = {};
       
       // Add standard filters
@@ -137,6 +141,16 @@ const RequestManagement = () => {
     setUpdateStatus('');
     setUpdateReason('');
     setUpdateModal(false);
+  };
+
+  const openDetailsModal = (request) => {
+    setSelectedRequestDetails(request);
+    setDetailsModal(true);
+  };
+
+  const closeDetailsModal = () => {
+    setSelectedRequestDetails(null);
+    setDetailsModal(false);
   };
   
   const formatDate = (date) => {
@@ -410,7 +424,7 @@ const RequestManagement = () => {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requester</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Urgency</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -425,11 +439,13 @@ const RequestManagement = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {request.userObjectId?.firstName} {request.userObjectId?.lastName || request.userId}
+                          {request.userObjectId?.fullName || request.userObjectId?.name || request.userId}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {request.patientName && request.isForSelf === false && 
-                           `For: ${request.patientName}`}
+                          {request.userObjectId?.email || 'N/A'}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {request?.userId}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -467,8 +483,14 @@ const RequestManagement = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <button
+                          onClick={() => openDetailsModal(request)}
+                          className="text-green-600 hover:text-green-800 hover:underline"
+                        >
+                          View Details
+                        </button>
+                        <button
                           onClick={() => openUpdateModal(request)}
-                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                          className="ml-3 text-blue-600 hover:text-blue-800 hover:underline"
                         >
                           Update Status
                         </button>
@@ -551,6 +573,727 @@ const RequestManagement = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Request Details Modal */}
+      {detailsModal && selectedRequestDetails && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white scale-[0.90] rounded-lg max-w-4xl w-full max-h-screen overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h3 className="text-lg font-medium text-gray-900">
+                Request Details - {selectedRequestDetails.requestId}
+              </h3>
+              <button
+                onClick={closeDetailsModal}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[80vh]">
+              {/* User Details Section */}
+              <div className="mb-8">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">User Details</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedRequestDetails.userObjectId?.fullName || selectedRequestDetails.userObjectId?.name || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">User ID</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedRequestDetails.userId}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedRequestDetails.userObjectId?.email || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Phone</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedRequestDetails.userObjectId?.phone || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedRequestDetails.userObjectId?.dateOfBirth ? 
+                        new Date(selectedRequestDetails.userObjectId.dateOfBirth).toLocaleDateString() : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Blood Type</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedRequestDetails.userObjectId?.bloodType || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Gender</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedRequestDetails.userObjectId?.gender ? 
+                        selectedRequestDetails.userObjectId.gender.charAt(0).toUpperCase() + 
+                        selectedRequestDetails.userObjectId.gender.slice(1) : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Account Status</label>
+                    <p className="text-sm bg-gray-50 p-2 rounded">
+                      <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                        selectedRequestDetails.userObjectId?.status === 'active' ? 'bg-green-100 text-green-800' : 
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {selectedRequestDetails.userObjectId?.status ? 
+                          selectedRequestDetails.userObjectId.status.charAt(0).toUpperCase() + 
+                          selectedRequestDetails.userObjectId.status.slice(1) : 'Unknown'}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional User Information */}
+              <div className="mb-8">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Additional User Information</h4>
+                
+                {/* Address Information */}
+                {selectedRequestDetails.userObjectId?.address && (
+                  <div className="mb-6">
+                    <h5 className="text-md font-medium text-gray-700 mb-3">Address</h5>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Street</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.address.street || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">City</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.address.city || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">State</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.address.state || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Postal Code</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.address.postalCode || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Country</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.address.country || 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* KYC and Verification Status */}
+                <div className="mb-6">
+                  <h5 className="text-md font-medium text-gray-700 mb-3">Verification Status</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">KYC Status</label>
+                      <p className="text-sm bg-gray-50 p-2 rounded">
+                        <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                          selectedRequestDetails.userObjectId?.kycStatus === 'completed' ? 'bg-green-100 text-green-800' : 
+                          selectedRequestDetails.userObjectId?.kycStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                          selectedRequestDetails.userObjectId?.kycStatus === 'rejected' ? 'bg-red-100 text-red-800' : 
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {selectedRequestDetails.userObjectId?.kycStatus ? 
+                            selectedRequestDetails.userObjectId.kycStatus.replace('_', ' ').toUpperCase() : 'NOT SUBMITTED'}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Profile Completed</label>
+                      <p className="text-sm bg-gray-50 p-2 rounded">
+                        <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                          selectedRequestDetails.userObjectId?.profile_completed ? 'bg-green-100 text-green-800' : 
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {selectedRequestDetails.userObjectId?.profile_completed ? 'YES' : 'NO'}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Profile Completion %</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.userObjectId?.profileCompletion || 0}%
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Verified</label>
+                      <p className="text-sm bg-gray-50 p-2 rounded">
+                        <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                          selectedRequestDetails.userObjectId?.isVerified ? 'bg-green-100 text-green-800' : 
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {selectedRequestDetails.userObjectId?.isVerified ? 'VERIFIED' : 'NOT VERIFIED'}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Staff Approval</label>
+                      <p className="text-sm bg-gray-50 p-2 rounded">
+                        <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                          selectedRequestDetails.userObjectId?.staff_approval ? 'bg-green-100 text-green-800' : 
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {selectedRequestDetails.userObjectId?.staff_approval ? 'APPROVED' : 'NOT APPROVED'}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* User Roles */}
+                <div className="mb-6">
+                  <h5 className="text-md font-medium text-gray-700 mb-3">User Roles</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Donor</label>
+                      <p className="text-sm bg-gray-50 p-2 rounded">
+                        <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                          selectedRequestDetails.userObjectId?.role?.donor ? 'bg-green-100 text-green-800' : 
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {selectedRequestDetails.userObjectId?.role?.donor ? 'YES' : 'NO'}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Staff</label>
+                      <p className="text-sm bg-gray-50 p-2 rounded">
+                        <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                          selectedRequestDetails.userObjectId?.role?.staff ? 'bg-blue-100 text-blue-800' : 
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {selectedRequestDetails.userObjectId?.role?.staff ? 'YES' : 'NO'}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Admin</label>
+                      <p className="text-sm bg-gray-50 p-2 rounded">
+                        <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                          selectedRequestDetails.userObjectId?.role?.admin ? 'bg-purple-100 text-purple-800' : 
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {selectedRequestDetails.userObjectId?.role?.admin ? 'YES' : 'NO'}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Emergency Contact */}
+                {selectedRequestDetails.userObjectId?.emergencyContact && (
+                  <div className="mb-6">
+                    <h5 className="text-md font-medium text-gray-700 mb-3">Emergency Contact</h5>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Name</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.emergencyContact.name || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Relationship</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.emergencyContact.relationship || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Phone</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.emergencyContact.phone || 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Medical Information */}
+                {selectedRequestDetails.userObjectId?.medicalInfo && (
+                  <div className="mb-6">
+                    <h5 className="text-md font-medium text-gray-700 mb-3">Medical Information</h5>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Height (cm)</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.medicalInfo.height || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Weight (kg)</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.medicalInfo.weight || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Last Checkup</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.medicalInfo.lastCheckup ? 
+                            new Date(selectedRequestDetails.userObjectId.medicalInfo.lastCheckup).toLocaleDateString() : 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Last Donation</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.lastDonation ? 
+                            new Date(selectedRequestDetails.userObjectId.lastDonation).toLocaleDateString() : 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Next Eligible Donation</label>
+                        <p className="text-sm bg-gray-50 p-2 rounded">
+                          {selectedRequestDetails.userObjectId.nextEligibleDonation ? (
+                            (() => {
+                              const nextDate = new Date(selectedRequestDetails.userObjectId.nextEligibleDonation);
+                              const today = new Date();
+                              const isEligible = today >= nextDate;
+                              return (
+                                <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                                  isEligible ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {isEligible ? 'ELIGIBLE NOW' : nextDate.toLocaleDateString()}
+                                </span>
+                              );
+                            })()
+                          ) : (
+                            <span className="px-2 py-1 text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                              ELIGIBLE NOW
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      {selectedRequestDetails.userObjectId.medicalInfo.allergies && 
+                       selectedRequestDetails.userObjectId.medicalInfo.allergies.length > 0 && (
+                        <div className="col-span-2">
+                          <label className="block text-sm font-medium text-gray-700">Allergies</label>
+                          <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                            {selectedRequestDetails.userObjectId.medicalInfo.allergies.join(', ')}
+                          </p>
+                        </div>
+                      )}
+                      {selectedRequestDetails.userObjectId.medicalInfo.medications && 
+                       selectedRequestDetails.userObjectId.medicalInfo.medications.length > 0 && (
+                        <div className="col-span-2">
+                          <label className="block text-sm font-medium text-gray-700">Current Medications</label>
+                          <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                            {selectedRequestDetails.userObjectId.medicalInfo.medications.join(', ')}
+                          </p>
+                        </div>
+                      )}
+                      {selectedRequestDetails.userObjectId.medicalInfo.conditions && 
+                       selectedRequestDetails.userObjectId.medicalInfo.conditions.length > 0 && (
+                        <div className="col-span-2">
+                          <label className="block text-sm font-medium text-gray-700">Medical Conditions</label>
+                          <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                            {selectedRequestDetails.userObjectId.medicalInfo.conditions.join(', ')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Donation History Summary */}
+                {selectedRequestDetails.userObjectId?.donationHistory && 
+                 selectedRequestDetails.userObjectId.donationHistory.length > 0 && (
+                  <div className="mb-6">
+                    <h5 className="text-md font-medium text-gray-700 mb-3">Donation History Summary</h5>
+                    <div className="bg-gray-50 p-4 rounded">
+                      <p className="text-sm text-gray-900">
+                        <strong>Total Donations:</strong> {selectedRequestDetails.userObjectId.donationHistory.length}
+                      </p>
+                      <p className="text-sm text-gray-900 mt-1">
+                        <strong>Recent Donations:</strong>
+                      </p>
+                      <div className="mt-2 space-y-1">
+                        {selectedRequestDetails.userObjectId.donationHistory.slice(0, 3).map((donation, index) => (
+                          <div key={index} className="text-xs text-gray-700 bg-white p-2 rounded">
+                            {donation.type} - {donation.status} - {new Date(donation.date).toLocaleDateString()}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Account Timestamps */}
+                <div className="mb-6">
+                  <h5 className="text-md font-medium text-gray-700 mb-3">Account Information</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Account Created</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.userObjectId?.createdAt ? 
+                          new Date(selectedRequestDetails.userObjectId.createdAt).toLocaleString() : 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Last Login</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.userObjectId?.lastLogin ? 
+                          new Date(selectedRequestDetails.userObjectId.lastLogin).toLocaleString() : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Request Details Section */}
+              <div className="mb-8">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Request Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Request ID</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedRequestDetails.requestId}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Request Type</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedRequestDetails.type === 'blood' ? 'Blood Request' : 
+                       selectedRequestDetails.type === 'organ' ? 'Organ Request' : 
+                       selectedRequestDetails.type}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Sub Type</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedRequestDetails.subType || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Status</label>
+                    <p className="text-sm bg-gray-50 p-2 rounded">
+                      <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                        selectedRequestDetails.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                        selectedRequestDetails.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                        selectedRequestDetails.status === 'matched' || selectedRequestDetails.status === 'fulfilled' ? 'bg-blue-100 text-blue-800' : 
+                        selectedRequestDetails.status === 'cancelled' ? 'bg-gray-100 text-gray-800' : 
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {selectedRequestDetails.status.charAt(0).toUpperCase() + selectedRequestDetails.status.slice(1)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Urgency</label>
+                    <p className="text-sm bg-gray-50 p-2 rounded">
+                      <span className={`px-2 py-1 text-xs leading-5 font-semibold rounded-full ${
+                        selectedRequestDetails.urgency === 'critical' ? 'bg-red-100 text-red-800' : 
+                        selectedRequestDetails.urgency === 'high' ? 'bg-orange-100 text-orange-800' : 
+                        selectedRequestDetails.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {selectedRequestDetails.urgency.charAt(0).toUpperCase() + selectedRequestDetails.urgency.slice(1)}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Is For Self</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {selectedRequestDetails.isForSelf ? 'Yes' : 'No'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Patient Details (if not for self) */}
+              {!selectedRequestDetails.isForSelf && (
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Patient Details</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Patient Name</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.patientName || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Recipient Age</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.recipientAge || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Medical Details */}
+              <div className="mb-8">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Medical Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {selectedRequestDetails.bloodType && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Required Blood Type</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.bloodType}
+                      </p>
+                    </div>
+                  )}
+                  {selectedRequestDetails.organ && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Required Organ</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.organ}
+                      </p>
+                    </div>
+                  )}
+                  {selectedRequestDetails.organType && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Organ Type</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.organType}
+                      </p>
+                    </div>
+                  )}
+                  {selectedRequestDetails.quantity && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Quantity (Units)</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.quantity}
+                      </p>
+                    </div>
+                  )}
+                  {selectedRequestDetails.requiredBy && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Required By</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {new Date(selectedRequestDetails.requiredBy).toLocaleDateString()}
+                      </p>
+                    </div>
+                  )}
+                  {selectedRequestDetails.medicalCondition && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Medical Condition</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.medicalCondition}
+                      </p>
+                    </div>
+                  )}
+                  {selectedRequestDetails.doctorName && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Doctor Name</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.doctorName}
+                      </p>
+                    </div>
+                  )}
+                  {selectedRequestDetails.doctorContact && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Doctor Contact</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.doctorContact}
+                      </p>
+                    </div>
+                  )}
+                  {selectedRequestDetails.medicalCertificate && (
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">Medical Certificate</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.medicalCertificate}
+                      </p>
+                    </div>
+                  )}
+                  {selectedRequestDetails.medicalNotes && (
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">Medical Notes</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded whitespace-pre-wrap">
+                        {selectedRequestDetails.medicalNotes}
+                      </p>
+                    </div>
+                  )}
+                  {selectedRequestDetails.medicalDetails && (
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">Medical Details</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded whitespace-pre-wrap">
+                        {selectedRequestDetails.medicalDetails}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Hospital Details */}
+              {selectedRequestDetails.hospital && (
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Hospital Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Hospital Name</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.hospital.name || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Hospital Phone</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.hospital.phone || 'N/A'}
+                      </p>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">Hospital Address</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.hospital.address || 'N/A'}
+                      </p>
+                    </div>
+                    {selectedRequestDetails.hospital.coordinates && (
+                      <div className="col-span-2">
+                        <label className="block text-sm font-medium text-gray-700">Coordinates</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          Lat: {selectedRequestDetails.hospital.coordinates.latitude}, 
+                          Lng: {selectedRequestDetails.hospital.coordinates.longitude}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Campaign Details */}
+              {selectedRequestDetails.campaignRequired && (
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Campaign Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Campaign Required</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                        {selectedRequestDetails.campaignRequired ? 'Yes' : 'No'}
+                      </p>
+                    </div>
+                    {selectedRequestDetails.campaignDate && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Campaign Date</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                          {new Date(selectedRequestDetails.campaignDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                    )}
+                    {selectedRequestDetails.campaignDescription && (
+                      <div className="col-span-2">
+                        <label className="block text-sm font-medium text-gray-700">Campaign Description</label>
+                        <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded whitespace-pre-wrap">
+                          {selectedRequestDetails.campaignDescription}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Status Details */}
+              <div className="mb-8">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Status Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {selectedRequestDetails.rejectionReason ? (
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Rejection Reason</label>
+                      <p className="text-sm text-gray-900 bg-red-50 border border-red-200 p-2 rounded whitespace-pre-wrap">
+                        {selectedRequestDetails.rejectionReason}
+                      </p>
+                    </div>
+                  ) : ('None')}
+                  {selectedRequestDetails.statusNotes && (
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">Status Notes</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded whitespace-pre-wrap">
+                        {selectedRequestDetails.statusNotes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Fulfillment Details */}
+              {selectedRequestDetails.fulfilledBy && selectedRequestDetails.fulfilledBy.length > 0 && (
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Fulfillment Details</h4>
+                  <div className="space-y-4">
+                    {selectedRequestDetails.fulfilledBy.map((fulfillment, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Donor ID</label>
+                            <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                              {fulfillment.donorId || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Donation ID</label>
+                            <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                              {fulfillment.donationId || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                            <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                              {fulfillment.quantity || 'N/A'}
+                            </p>
+                          </div>
+                          <div className="col-span-3">
+                            <label className="block text-sm font-medium text-gray-700">Fulfillment Date</label>
+                            <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                              {fulfillment.date ? new Date(fulfillment.date).toLocaleString() : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Timestamps */}
+              <div className="mb-4">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Timestamps</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Created At</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {new Date(selectedRequestDetails.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Updated At</label>
+                    <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
+                      {new Date(selectedRequestDetails.updatedAt).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t p-6 bg-gray-50 flex justify-end">
+              {/* <button
+                onClick={closeDetailsModal}
+                className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition"
+              >
+                Close
+              </button> */}
             </div>
           </div>
         </div>

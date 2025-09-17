@@ -202,16 +202,6 @@ const WebsiteChatInterface = ({ userId = '' }) => {
                 <ChatBot />
               </AIProvider>
             </div>
-
-            {/* Full support link */}
-            <div className="mt-2 text-center">
-              <button 
-                onClick={openFullSupport}
-                className="text-sm text-[#248CC4] hover:underline"
-              >
-                Open full support page
-              </button>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

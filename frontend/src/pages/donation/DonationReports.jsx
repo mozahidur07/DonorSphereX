@@ -13,7 +13,7 @@ const StatusIcon = ({ status }) => {
         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
       </svg>
     );
-  } else if (status === 'rejected') {
+  } else if (status === 'rejected' || status === 'cancelled') {
     return (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -375,7 +375,7 @@ const DonationReports = () => {
             </div>
             
             {/* Modal content */}
-            <div className="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100">
+            <div className="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-100 max-h-[90vh]">
               {/* Modal header with gradient */}
               <div className={`bg-gradient-to-r ${
                 (selectedReport.donationType === 'Blood' || selectedReport.type === 'Blood Donation')
@@ -401,7 +401,7 @@ const DonationReports = () => {
                 <div className="flex justify-center mb-4">
                   <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium ${
                     selectedReport.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                    selectedReport.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                    selectedReport.status === 'rejected' || selectedReport.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
                     'bg-yellow-100 text-yellow-800'
                   }`}>
                     <StatusIcon status={selectedReport.status} />
@@ -409,113 +409,294 @@ const DonationReports = () => {
                   </span>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-500">Report ID</p>
-                    <p className="text-sm font-bold text-gray-900 bg-gray-50 px-3 py-1 rounded">{selectedReport.donationId || selectedReport.id}</p>
-                  </div>
-                  
-                  <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-500">Type</p>
-                    <div className="flex items-center">
-                      <DonationTypeIcon type={selectedReport.donationType || selectedReport.type} />
-                      <p className="ml-1 text-sm font-bold text-gray-900">{selectedReport.donationType || selectedReport.type} - {selectedReport.donationSubType || selectedReport.subType}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-500">Date & Time</p>
-                    <div className="flex items-center text-blue-600">
-                      <svg className="flex-shrink-0 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                      </svg>
-                      <p className="text-sm font-medium">
-                        {format(new Date(selectedReport.date || selectedReport.createdAt || new Date()), 'MMM dd, yyyy')} at {format(new Date(selectedReport.date || selectedReport.createdAt || new Date()), 'h:mm a')}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-500">Location</p>
-                    <div className="flex items-center">
-                      <svg className="flex-shrink-0 mr-1 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                      </svg>
-                      <p className="text-sm font-medium text-gray-900">{selectedReport.location || selectedReport.preferredHospital || 'Not specified'}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                    <p className="text-sm font-medium text-gray-500">Blood Type</p>
-                    <p className="text-sm font-medium text-red-600 bg-red-50 px-3 py-1 rounded-lg">{selectedReport.bloodType || selectedReport.donorBloodType || 'Not specified'}</p>
-                  </div>
-                  
-                  {/* Show donor's name when donation is for self */}
-                  {(selectedReport.isForSelf === true || selectedReport.isForSelf === undefined) && selectedReport.userName && (
+                <div className="max-h-96 overflow-y-auto space-y-4">
+                  {/* Basic Information Section */}
+                  <div className="space-y-4">
                     <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500">Donor Name</p>
+                      <p className="text-sm font-medium text-gray-500">Donation ID</p>
+                      <p className="text-sm font-bold text-gray-900 bg-gray-50 px-3 py-1 rounded">{selectedReport.donationId || selectedReport.id}</p>
+                    </div>
+                    
+                    <div className="flex justify-between items-center border-b border-gray-200 pb-3">
+                      <p className="text-sm font-medium text-gray-500">Type</p>
                       <div className="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        <p className="text-sm font-medium text-green-600">{selectedReport.userName}</p>
+                        <DonationTypeIcon type={selectedReport.donationType || selectedReport.type} />
+                        <p className="ml-1 text-sm font-bold text-gray-900">{selectedReport.donationType || selectedReport.type}{selectedReport.donationSubType && ` - ${selectedReport.donationSubType || selectedReport.subType}`}</p>
                       </div>
                     </div>
-                  )}
-                  
-                  {/* Show patient name when donation is for someone else */}
-                  {selectedReport.isForSelf === false && selectedReport.patientName && (
+                    
                     <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500">Donor  Name</p>
-                      <div className="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        <p className="text-sm font-medium text-blue-600">{selectedReport.patientName}</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {(selectedReport.age || selectedReport.donorAge) && (
-                    <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500">Donor Age</p>
-                      <p className="text-sm font-medium text-gray-900">{selectedReport.age || selectedReport.donorAge} years</p>
-                    </div>
-                  )}
-                  
-                  {selectedReport.rejectionReason && (
-                    <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500">Rejection Reason</p>
-                      <p className="text-sm font-medium text-red-600 bg-red-50 px-3 py-1 rounded-lg">{selectedReport.rejectionReason}</p>
-                    </div>
-                  )}
-                  
-                  {selectedReport.statusNotes && (
-                    <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500">Status Notes</p>
-                      <p className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">{selectedReport.statusNotes}</p>
-                    </div>
-                  )}
-                  
-                  {selectedReport.nextAppointment && (
-                    <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500">Next Appointment</p>
-                      <div className="flex items-center text-green-600">
+                      <p className="text-sm font-medium text-gray-500">Donation Date</p>
+                      <div className="flex items-center text-blue-600">
                         <svg className="flex-shrink-0 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                          <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                         </svg>
                         <p className="text-sm font-medium">
-                          {format(new Date(selectedReport.nextAppointment), 'MMM dd, yyyy')} at {format(new Date(selectedReport.nextAppointment), 'h:mm a')}
+                          {format(new Date(selectedReport.date || selectedReport.createdAt || new Date()), 'MMM dd, yyyy h:mm a')}
                         </p>
                       </div>
                     </div>
+
+                    {selectedReport.updatedAt && (
+                      <div className="flex justify-between items-center border-b border-gray-200 pb-3">
+                        <p className="text-sm font-medium text-gray-500">Last Updated</p>
+                        <div className="flex items-center text-gray-600">
+                          <svg className="flex-shrink-0 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                          </svg>
+                          <p className="text-sm font-medium">
+                            {format(new Date(selectedReport.updatedAt), 'MMM dd, yyyy h:mm a')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Donor Information Section */}
+                  <div className="bg-blue-50 p-4 rounded-lg space-y-3">
+                    <h4 className="text-sm font-semibold text-blue-800 border-b border-blue-200 pb-2">Donor Information</h4>
+                    
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm font-medium text-blue-700">Donation For</p>
+                      <p className="text-sm font-medium text-blue-900">
+                        {selectedReport.isForSelf !== false ? 'Self' : 'Other Person'}
+                      </p>
+                    </div>
+
+                    {selectedReport.userName && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-blue-700">Donor Name</p>
+                        <div className="flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          <p className="text-sm font-medium text-blue-900">{selectedReport.userName}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedReport.userEmail && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-blue-700">Email</p>
+                        <div className="flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                          </svg>
+                          <p className="text-sm font-medium text-blue-900">{selectedReport.userEmail}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedReport.isForSelf === false && selectedReport.patientName && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-blue-700">Patient Name</p>
+                        <div className="flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          <p className="text-sm font-medium text-purple-900">{selectedReport.patientName}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {(selectedReport.age || selectedReport.donorAge) && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-blue-700">Age</p>
+                        <p className="text-sm font-medium text-blue-900">{selectedReport.age || selectedReport.donorAge} years</p>
+                      </div>
+                    )}
+
+                    {selectedReport.weight && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-blue-700">Weight</p>
+                        <p className="text-sm font-medium text-blue-900">{selectedReport.weight} kg</p>
+                      </div>
+                    )}
+
+                    {selectedReport.height && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-blue-700">Height</p>
+                        <p className="text-sm font-medium text-blue-900">{selectedReport.height} cm</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Medical Information Section */}
+                  <div className="bg-green-50 p-4 rounded-lg space-y-3">
+                    <h4 className="text-sm font-semibold text-green-800 border-b border-green-200 pb-2">Medical Information</h4>
+                    
+                    {(selectedReport.bloodType || selectedReport.donorBloodType) && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-green-700">Blood Type</p>
+                        <p className="text-sm font-bold text-red-600 bg-red-50 px-3 py-1 rounded-lg">{selectedReport.bloodType || selectedReport.donorBloodType}</p>
+                      </div>
+                    )}
+
+                    {selectedReport.organType && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-green-700">Organ Type</p>
+                        <p className="text-sm font-medium text-green-900 bg-green-100 px-3 py-1 rounded-lg">{selectedReport.organType}</p>
+                      </div>
+                    )}
+
+                    {selectedReport.quantity && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-green-700">Quantity</p>
+                        <p className="text-sm font-medium text-green-900">{selectedReport.quantity} units</p>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm font-medium text-green-700">Chronic Illness</p>
+                      <p className={`text-sm font-medium px-3 py-1 rounded-lg ${
+                        selectedReport.hasChronicIllness ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-100'
+                      }`}>
+                        {selectedReport.hasChronicIllness ? 'Yes' : 'No'}
+                      </p>
+                    </div>
+
+                    {selectedReport.hasChronicIllness && selectedReport.chronicIllnessDetails && (
+                      <div>
+                        <p className="text-sm font-medium text-green-700 mb-2">Chronic Illness Details</p>
+                        <div className="bg-red-50 rounded-lg p-3 text-sm text-red-800 border border-red-200">
+                          <p>{selectedReport.chronicIllnessDetails}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm font-medium text-green-700">Medical Condition</p>
+                      <p className={`text-sm font-medium px-3 py-1 rounded-lg ${
+                        selectedReport.hasMedicalCondition ? 'text-orange-600 bg-orange-50' : 'text-green-600 bg-green-100'
+                      }`}>
+                        {selectedReport.hasMedicalCondition ? 'Yes' : 'No'}
+                      </p>
+                    </div>
+
+                    {selectedReport.hasMedicalCondition && selectedReport.medicalConditionDetails && (
+                      <div>
+                        <p className="text-sm font-medium text-green-700 mb-2">Medical Condition Details</p>
+                        <div className="bg-orange-50 rounded-lg p-3 text-sm text-orange-800 border border-orange-200">
+                          <p>{selectedReport.medicalConditionDetails}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Contact Information Section */}
+                  {(selectedReport.contactNumber || selectedReport.emergencyContact || selectedReport.relationship) && (
+                    <div className="bg-purple-50 p-4 rounded-lg space-y-3">
+                      <h4 className="text-sm font-semibold text-purple-800 border-b border-purple-200 pb-2">Contact Information</h4>
+                      
+                      {selectedReport.contactNumber && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-purple-700">Contact Number</p>
+                          <div className="flex items-center">
+                            <svg className="flex-shrink-0 mr-1 h-4 w-4 text-purple-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                            </svg>
+                            <p className="text-sm font-medium text-purple-900">{selectedReport.contactNumber}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedReport.emergencyContact && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-purple-700">Emergency Contact</p>
+                          <div className="flex items-center">
+                            <svg className="flex-shrink-0 mr-1 h-4 w-4 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                            </svg>
+                            <p className="text-sm font-medium text-purple-900">{selectedReport.emergencyContact}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedReport.relationship && (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-purple-700">Relationship</p>
+                          <p className="text-sm font-medium text-purple-900 bg-purple-100 px-3 py-1 rounded-lg">{selectedReport.relationship}</p>
+                        </div>
+                      )}
+                    </div>
                   )}
-                  
-                  {(selectedReport.notes || selectedReport.additionalNotes) && (
-                    <div className="border-b border-gray-200 pb-3">
-                      <p className="text-sm font-medium text-gray-500 mb-2">Notes</p>
-                      <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-800">
-                        <p>{selectedReport.notes || selectedReport.additionalNotes}</p>
+
+                  {/* Location Information Section */}
+                  <div className="bg-yellow-50 p-4 rounded-lg space-y-3">
+                    <h4 className="text-sm font-semibold text-yellow-800 border-b border-yellow-200 pb-2">Location Information</h4>
+                    
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm font-medium text-yellow-700">Location</p>
+                      <div className="flex items-center">
+                        <svg className="flex-shrink-0 mr-1 h-4 w-4 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                        </svg>
+                        <p className="text-sm font-medium text-yellow-900">{selectedReport.location || selectedReport.preferredHospital || 'Not specified'}</p>
+                      </div>
+                    </div>
+
+                    {selectedReport.preferredHospital && selectedReport.location !== selectedReport.preferredHospital && (
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-yellow-700">Preferred Hospital</p>
+                        <div className="flex items-center">
+                          <svg className="flex-shrink-0 mr-1 h-4 w-4 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                          </svg>
+                          <p className="text-sm font-medium text-yellow-900">{selectedReport.preferredHospital}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Status Information Section */}
+                  <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-800 border-b border-gray-200 pb-2">Status Information</h4>
+                    
+                    {selectedReport.rejectionReason && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 mb-2">Rejection Reason</p>
+                        <div className="bg-red-50 rounded-lg p-3 text-sm text-red-800 border border-red-200">
+                          <p>{selectedReport.rejectionReason}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedReport.statusNotes && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 mb-2">Status Notes</p>
+                        <div className="bg-blue-50 rounded-lg p-3 text-sm text-blue-800 border border-blue-200">
+                          <p>{selectedReport.statusNotes}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Additional Information Section */}
+                  {(selectedReport.additionalNotes || selectedReport.notes) && (
+                    <div className="bg-amber-50 p-4 rounded-lg">
+                      <h4 className="text-sm font-semibold text-amber-800 border-b border-amber-200 pb-2 mb-3">Additional Notes</h4>
+                      <div className="bg-amber-100 rounded-lg p-3 text-sm text-amber-800">
+                        <p>{selectedReport.additionalNotes || selectedReport.notes}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Next Appointment Section */}
+                  {selectedReport.nextAppointment && (
+                    <div className="bg-indigo-50 p-4 rounded-lg space-y-3">
+                      <h4 className="text-sm font-semibold text-indigo-800 border-b border-indigo-200 pb-2">Next Appointment</h4>
+                      
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium text-indigo-700">Scheduled For</p>
+                        <div className="flex items-center text-indigo-600">
+                          <svg className="flex-shrink-0 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                          </svg>
+                          <p className="text-sm font-medium">
+                            {format(new Date(selectedReport.nextAppointment), 'MMM dd, yyyy h:mm a')}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}

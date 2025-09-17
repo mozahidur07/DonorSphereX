@@ -75,7 +75,7 @@ const AppContent = () => {
         {showNavbar && <Navbar />}
         <main className="flex-grow">
           {/* API Debugger for development */}
-          <ApiDebugger />
+          {/* <ApiDebugger /> */}
           
           <Routes>
             {/* Public Routes */}

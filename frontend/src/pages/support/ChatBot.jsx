@@ -181,7 +181,12 @@ const ChatBot = () => {
           <div className="text-center p-4">
             <p className="mb-2">No conversation selected</p>
             <button
-              onClick={() => startNewConversation()}
+              onClick={async () => {
+                const newConversationId = await startNewConversation();
+                if (newConversationId) {
+                  setCurrentConversationId(newConversationId);
+                }
+              }}
               className="text-sm bg-[#248CC4] text-white py-1.5 px-3 rounded hover:bg-[#1a6b9a]"
             >
               Start a new conversation
@@ -329,9 +334,12 @@ const ChatBot = () => {
         </div>
         <div className="text-center">
           <button
-            onClick={() => {
-              setChatMenu('chat');
-              startNewConversation();
+            onClick={async () => {
+              const newConversationId = await startNewConversation();
+              if (newConversationId) {
+                setCurrentConversationId(newConversationId);
+                setChatMenu('chat');
+              }
             }}
             className="bg-[#248CC4] text-white py-2 px-6 rounded-lg hover:bg-[#1a6b9a] transition-colors"
           >
@@ -383,9 +391,12 @@ const ChatBot = () => {
           <p className="mb-2">No conversation history yet.</p>
           <p className="text-sm text-gray-400 mb-4">Start a new chat to get help with blood donation.</p>
           <button
-            onClick={() => {
-              setChatMenu('chat');
-              startNewConversation();
+            onClick={async () => {
+              const newConversationId = await startNewConversation();
+              if (newConversationId) {
+                setCurrentConversationId(newConversationId);
+                setChatMenu('chat');
+              }
             }}
             className="mt-2 bg-[#248CC4] text-white py-2 px-6 rounded-lg hover:bg-[#1a6b9a] transition-colors"
           >
@@ -454,9 +465,12 @@ const ChatBot = () => {
         </div>
         <div className="text-center mt-6">
           <button
-            onClick={() => {
-              setChatMenu('chat');
-              startNewConversation();
+            onClick={async () => {
+              const newConversationId = await startNewConversation();
+              if (newConversationId) {
+                setCurrentConversationId(newConversationId);
+                setChatMenu('chat');
+              }
             }}
             className="bg-[#248CC4] text-white py-2 px-6 rounded-lg hover:bg-[#1a6b9a] flex items-center justify-center mx-auto gap-2"
           >
@@ -493,9 +507,14 @@ const ChatBot = () => {
           <div className="flex items-center gap-2">
             {currentConversation && chatMenu === 'chat' && (
               <button
-                onClick={() => {
+                onClick={async () => {
                   animateIcon('new-chat-icon');
-                  setTimeout(() => startNewConversation(), 500);
+                  setTimeout(async () => {
+                    const newConversationId = await startNewConversation();
+                    if (newConversationId) {
+                      setCurrentConversationId(newConversationId);
+                    }
+                  }, 500);
                 }}
                 className="header-btn text-white text-xs sm:text-sm bg-white/20 font-medium border border-white/30 py-1 sm:py-1.5 px-2 sm:px-3 rounded-full hover:bg-white/30 transition-colors duration-300 flex items-center gap-1"
                 title="New conversation"
