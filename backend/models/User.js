@@ -7,7 +7,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
     default: function() {
-      // Generate ID
       const randomNum = Math.floor(1000000000 + Math.random() * 9000000000);
       return `LD-${randomNum}`;
     }

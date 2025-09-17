@@ -253,7 +253,6 @@ exports.updateDonationStatus = async (req, res, next) => {
       status: status
     });
     
-    // Send notification to the user about donation status change
     try {
       const notificationUtils = require('../../utils/notificationUtils');
 

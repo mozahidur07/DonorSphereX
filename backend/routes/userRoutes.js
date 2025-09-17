@@ -57,11 +57,9 @@ router.post('/register', async (req, res) => {
       });
     }
     
-    // Create new user
     const newUser = new User(req.body);
     const savedUser = await newUser.save();
     
-    // Remove password from response
     const userResponse = savedUser.toObject();
     delete userResponse.password;
     
@@ -90,8 +88,7 @@ router.post('/login', async (req, res) => {
         message: 'Invalid credentials'
       });
     }
-    
-    // Compare password
+     
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({
@@ -157,7 +154,6 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE user
 router.delete('/:id', async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);

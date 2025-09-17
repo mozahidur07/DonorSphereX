@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Connect to MongoDB database with retry logic
 const connectDB = async (retryCount = 5, delay = 5000) => {
   let currentRetry = 0;
   
@@ -18,8 +17,8 @@ const connectDB = async (retryCount = 5, delay = 5000) => {
       const conn = await mongoose.connect(mongoURI, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-        serverSelectionTimeoutMS: 10000, // Timeout after 10 seconds
-        heartbeatFrequencyMS: 30000, // Heartbeat every 30 seconds
+        serverSelectionTimeoutMS: 10000, 
+        heartbeatFrequencyMS: 30000, 
       });
       
       console.log(`MongoDB connected: ${conn.connection.host}`);

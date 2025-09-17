@@ -3,7 +3,7 @@ const crypto = require('crypto');
  
 exports.addStaffNotification = async (targetUserId, notificationData, staffUser) => {
   try {
-    // Validate inputs
+ 
     if (!targetUserId || !notificationData || !notificationData.message || !notificationData.type) {
       console.error('Invalid notification data:', { targetUserId, notificationData });
       return false;

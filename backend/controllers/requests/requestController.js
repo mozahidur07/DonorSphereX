@@ -1,21 +1,20 @@
 const Request = require('../../models/Request');
 const User = require('../../models/User');
 const AppError = require('../../utils/appError');
+const { USER_POPULATE_FIELDS } = require('../../utils/userPopulateFields');
 
 exports.createRequest = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    
-    // Log incoming request data for debugging
+
     console.log('Creating request with data:', JSON.stringify(req.body, null, 2));
      
     const requestData = {
       ...req.body,
       userId,
-      userObjectId: req.user._id // Make sure the user's MongoDB ID is included
+      userObjectId: req.user._id 
     };
     
-    // Check for any 'b' references that might be undefined
     if (!requestData.type) {
       return next(new AppError('Request type is required', 400));
     }
@@ -32,7 +31,7 @@ exports.createRequest = async (req, res, next) => {
     console.log('Request created successfully:', request._id);
      
     await User.findByIdAndUpdate(
-      req.user._id, // Use MongoDB _id for this operation
+      req.user._id, 
       { $push: { requestHistory: request._id } },
       { new: true }
     );
@@ -44,7 +43,6 @@ exports.createRequest = async (req, res, next) => {
   } catch (error) {
     console.error('Error creating request:', error);
     
-    // Provide more detailed error message
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map(val => val.message);
       return next(new AppError(`Validation error: ${messages.join(', ')}`, 400));
@@ -58,7 +56,7 @@ exports.getUserRequests = async (req, res, next) => {
   try {
     const userId = req.user.userId;  
     const requests = await Request.find({ userId: userId })
-      .populate('userObjectId', 'firstName lastName email bloodType')
+      .populate('userObjectId', USER_POPULATE_FIELDS)
       .sort({ createdAt: -1 });
     
     console.log(`Found ${requests.length} requests for user ${userId}`);
@@ -86,7 +84,7 @@ exports.getUserRequestsByUserId = async (req, res, next) => {
     let requests = [];
      
     requests = await Request.find({ userId: userId })
-      .populate('userObjectId', 'firstName lastName email bloodType')
+      .populate('userObjectId', USER_POPULATE_FIELDS)
       .sort({ createdAt: -1 });
      
     if (requests.length === 0) {
@@ -95,7 +93,7 @@ exports.getUserRequestsByUserId = async (req, res, next) => {
         const user = await User.findById(userId);
         if (user) { 
           requests = await Request.find({ userId: user.userId })
-            .populate('userObjectId', 'firstName lastName email bloodType')
+            .populate('userObjectId', USER_POPULATE_FIELDS)
             .sort({ createdAt: -1 });
         }
       } catch (err) { 
