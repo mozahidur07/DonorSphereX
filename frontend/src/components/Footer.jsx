@@ -112,7 +112,7 @@ const Footer = () => {
       <div className="border-t border-gray-700">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
           <p className="text-sm text-gray-400">
-            &copy; {currentYear} DonorSphereX Donate. All rights reserved.
+            &copy; {currentYear} DonorSphereX. All rights reserved.
           </p>
           <p className="text-sm text-gray-400">
             Made with <Heart size={14} className="inline text-primary mx-1" /> for saving lives
